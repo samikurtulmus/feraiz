@@ -40,7 +40,7 @@ export default function VersesModal({ open, onClose }) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
       <div className="absolute inset-0 bg-black/40" onClick={onClose} />
-      <div className="relative z-10 bg-paper text-ink w-[min(880px,94vw)] rounded-2xl p-6 shadow-soft border border-subtle">
+      <div className="relative z-10 bg-paper text-ink dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700 w-[min(880px,94vw)] rounded-2xl p-6 shadow-soft border border-subtle">
         <div className="flex items-center justify-between mb-3">
           <h3 className="text-xl font-bold text-primary">Hesaplamada Referans Verilen Ayetler</h3>
           <button onClick={onClose} className="px-3 py-1 rounded-lg bg-secondary text-white">Kapat</button>

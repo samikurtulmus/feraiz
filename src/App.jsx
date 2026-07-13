@@ -1,431 +1,463 @@
-import React, { useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import NumberInput from "./components/NumberInput.jsx";
 import Header from "./components/Header.jsx";
 import Footer from "./components/Footer.jsx";
 import AboutModal from "./components/AboutModal.jsx";
 import ResultTable from "./components/ResultTable.jsx";
+import StepsPanel from "./components/StepsPanel.jsx";
 import VersesModal from "./components/VersesModal.jsx";
 import GoogleAd from "./components/GoogleAd.jsx";
 import { computeDistribution } from "./lib/feraiz.js";
+import { encodeState, decodeState, defaultState } from "./lib/urlState.js";
+import { listScenarios, saveScenario, loadScenario, deleteScenario } from "./lib/scenarios.js";
 
 const toN = (digits) => Number(digits || "0");
 
+// Paylaşım linkiyle gelindiyse form URL'deki durumla açılır
+const initialForm = typeof window !== "undefined" ? decodeState(window.location.search) : defaultState();
+
+const THEME_KEY = "feraiz.theme";
+const initialTheme =
+  typeof window !== "undefined"
+    ? localStorage.getItem(THEME_KEY) ||
+      (window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+    : "light";
+
 export default function App() {
-  // --- Tereke ---
-  const [gross, setGross] = useState("");
-  const [funeral, setFuneral] = useState("");
-  const [debts, setDebts] = useState("");
+  const [form, setForm] = useState(initialForm);
+  const upd = (field) => (value) => setForm((f) => ({ ...f, [field]: value }));
+  const updChecked = (field) => (e) => setForm((f) => ({ ...f, [field]: e.target.checked }));
 
-  // --- Eş & cinsiyet ---
-  const [decedentSex, setDecedentSex] = useState("male"); // male|female
-  const [husbandExists, setHusbandExists] = useState(false);
-  const [wivesCount, setWivesCount] = useState("");
+  // Temsili hat satırları için ortak yardımcılar
+  const addRow = (field, empty) => () => setForm((f) => ({ ...f, [field]: [...f[field], empty] }));
+  const setRow = (field, idx, patch) =>
+    setForm((f) => {
+      const arr = [...f[field]];
+      arr[idx] = { ...arr[idx], ...patch };
+      return { ...f, [field]: arr };
+    });
+  const delRow = (field, idx) =>
+    setForm((f) => {
+      const arr = [...f[field]];
+      arr.splice(idx, 1);
+      return { ...f, [field]: arr };
+    });
 
-  // --- Çocuklar (yaşayan) ---
-  const [sons, setSons] = useState("");
-  const [daughters, setDaughters] = useState("");
+  // --- Tema ---
+  const [theme, setTheme] = useState(initialTheme);
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem(THEME_KEY, theme);
+  }, [theme]);
 
-  // --- Torunlar (temsil, dinamik): ölü çocuk satırlarında giriliyor
-
-  // --- Ebeveyn ---
-  const [motherExists, setMotherExists] = useState(false);
-  const [fatherExists, setFatherExists] = useState(false);
-
-  // --- Kardeşler (yaşayan) ---
-  const [maternalSiblings, setMaternalSiblings] = useState(""); // anne-bir (toplam)
-  const [fullBrothers, setFullBrothers] = useState("");         // öz erkek
-  const [fullSisters, setFullSisters] = useState("");           // öz kız
-  const [halfPatBrothers, setHalfPatBrothers] = useState("");   // baba-bir erkek
-  const [halfPatSisters, setHalfPatSisters] = useState("");     // baba-bir kız
-
-  // --- Yeğenler (temsil, dinamik): ölü kardeş satırlarında giriliyor
-
-  // --- Temsili hatlar ---
-  const [deceasedChildren, setDeceasedChildren] = useState([]); // {sex:'male'|'female', grandsons:'', granddaughters:''}
-  const [deceasedFullSiblings, setDeceasedFullSiblings] = useState([]); // {sex:'male'|'female', sons:'', daughters:''}
-  const [deceasedHalfPatSiblings, setDeceasedHalfPatSiblings] = useState([]); // {sex:'male'|'female', sons:'', daughters:''}
-  const [deceasedMaternalSiblings, setDeceasedMaternalSiblings] = useState([]); // {sons:'', daughters:''}
-
-  // --- Modallar ---
+  // --- Modallar & bildirimler ---
   const [aboutOpen, setAboutOpen] = useState(false);
   const [versesOpen, setVersesOpen] = useState(false);
+  const [shareMsg, setShareMsg] = useState("");
 
-  // --- Hesap ---
-  const inputs = {
-    gross: toN(gross),
-    funeral: toN(funeral),
-    debts: toN(debts),
-    decedentSex,
-    husbandExists,
-    wivesCount: toN(wivesCount),
-    sons: toN(sons),
-    daughters: toN(daughters),
-    motherExists,
-    fatherExists,
-    maternalSiblings: toN(maternalSiblings),
-    fullBrothers: toN(fullBrothers),
-    fullSisters: toN(fullSisters),
-    halfPatBrothers: toN(halfPatBrothers),
-    halfPatSisters: toN(halfPatSisters),
-    // Toplu torun/yeğen kaldırıldı; temsil satırları kullanılıyor
-    deceasedChildren: deceasedChildren.map(it => ({ sex: it.sex, grandsons: toN(it.grandsons), granddaughters: toN(it.granddaughters) })),
-    deceasedFullSiblings: deceasedFullSiblings.map(it => ({ sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters) })),
-    deceasedHalfPatSiblings: deceasedHalfPatSiblings.map(it => ({ sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters) })),
-    deceasedMaternalSiblings: deceasedMaternalSiblings.map(it => ({ sons: toN(it.sons), daughters: toN(it.daughters) })),
-  };
+  // --- Senaryolar ---
+  const [scenarios, setScenarios] = useState(() => listScenarios());
+  const [scenarioName, setScenarioName] = useState("");
+  const [selectedScenario, setSelectedScenario] = useState("");
 
-  const result = useMemo(() => computeDistribution(inputs), [JSON.stringify(inputs)]);
+  // --- Hesap (ucuz olduğu için her render'da; memo gerekmiyor) ---
+  const result = computeDistribution({
+    gross: toN(form.gross),
+    funeral: toN(form.funeral),
+    debts: toN(form.debts),
+    decedentSex: form.decedentSex,
+    husbandExists: form.husbandExists,
+    wivesCount: toN(form.wivesCount),
+    sons: toN(form.sons),
+    daughters: toN(form.daughters),
+    motherExists: form.motherExists,
+    fatherExists: form.fatherExists,
+    maternalSiblings: toN(form.maternalSiblings),
+    fullBrothers: toN(form.fullBrothers),
+    fullSisters: toN(form.fullSisters),
+    halfPatBrothers: toN(form.halfPatBrothers),
+    halfPatSisters: toN(form.halfPatSisters),
+    deceasedChildren: form.deceasedChildren.map((it) => ({
+      sex: it.sex, grandsons: toN(it.grandsons), granddaughters: toN(it.granddaughters),
+    })),
+    deceasedFullSiblings: form.deceasedFullSiblings.map((it) => ({
+      sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
+    })),
+    deceasedHalfPatSiblings: form.deceasedHalfPatSiblings.map((it) => ({
+      sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
+    })),
+    deceasedMaternalSiblings: form.deceasedMaternalSiblings.map((it) => ({
+      sons: toN(it.sons), daughters: toN(it.daughters),
+    })),
+  });
+
+  // --- Girdi doğrulama uyarıları (motoru etkilemez, bilgilendirir) ---
+  const inputWarnings = [];
+  if (toN(form.debts) + toN(form.funeral) > toN(form.gross) && toN(form.gross) > 0)
+    inputWarnings.push("Defin gideri ve borçların toplamı brüt terekeyi aşıyor.");
+  if (form.decedentSex === "male" && toN(form.wivesCount) > 4)
+    inputWarnings.push("Eş sayısı 4'ten fazla girildi; lütfen kontrol edin.");
 
   const clearForm = () => {
-    setGross(""); setFuneral(""); setDebts("");
-    setHusbandExists(false); setWivesCount("");
-    setSons(""); setDaughters("");
-    setMotherExists(false); setFatherExists(false);
-    setMaternalSiblings("");
-    setFullBrothers(""); setFullSisters("");
-    setHalfPatBrothers(""); setHalfPatSisters("");
-    // Toplu torun/yeğen alanları kaldırıldı
-    setDeceasedChildren([]);
-    setDeceasedFullSiblings([]);
-    setDeceasedHalfPatSiblings([]);
-    setDeceasedMaternalSiblings([]);
+    setForm(defaultState());
+    setSelectedScenario("");
+    if (window.location.search) window.history.replaceState(null, "", window.location.pathname);
   };
 
+  const shareLink = async () => {
+    const qs = encodeState(form);
+    const url = `${window.location.origin}${window.location.pathname}?${qs}`;
+    window.history.replaceState(null, "", `?${qs}`);
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Feraiz.com hesap sonucu", url });
+        setShareMsg("Paylaşıldı");
+      } else {
+        await navigator.clipboard.writeText(url);
+        setShareMsg("Link kopyalandı");
+      }
+    } catch {
+      setShareMsg("Link adres çubuğunda hazır");
+    }
+    setTimeout(() => setShareMsg(""), 3000);
+  };
+
+  const onSaveScenario = () => {
+    saveScenario(scenarioName, form);
+    setScenarios(listScenarios());
+    setScenarioName("");
+  };
+
+  const onLoadScenario = (id) => {
+    setSelectedScenario(id);
+    if (!id) return;
+    const loaded = loadScenario(id);
+    if (loaded) setForm(loaded);
+  };
+
+  const onDeleteScenario = () => {
+    if (!selectedScenario) return;
+    deleteScenario(selectedScenario);
+    setScenarios(listScenarios());
+    setSelectedScenario("");
+  };
+
+  const inputCls = "dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100";
+  const sectionCls =
+    "bg-paper rounded-2xl p-5 shadow-soft border border-subtle dark:bg-slate-800/60 dark:border-slate-700";
+  const groupCls = "rounded-xl border border-subtle dark:border-slate-700 mt-4";
+  const summaryCls =
+    "cursor-pointer select-none list-none flex items-center justify-between p-3 font-semibold text-primary dark:text-slate-100";
+  const labelCls = "text-sm text-primary/80 dark:text-slate-300";
+
+  // Temsili hat satırı (vefat etmiş çocuk/kardeş) düzenleyici.
+  // Bilerek bileşen değil düz fonksiyon: render içinde tanımlı bir bileşen her
+  // tuş vuruşunda remount olur ve input odağı kaybolur.
+  const renderHatRows = ({ field, title, emptyRow, sexOptions, aField, bField, aLabel, bLabel, emptyHint }) => (
+    <div className="mt-4 border-t border-subtle dark:border-slate-700 pt-4">
+      <div className="flex items-center justify-between mb-2">
+        <h4 className="font-medium text-primary dark:text-slate-200">{title}</h4>
+        <button type="button" className="px-2 py-1 rounded-lg bg-secondary text-white text-sm" onClick={addRow(field, emptyRow)}>
+          Satır ekle
+        </button>
+      </div>
+      {form[field].length === 0 && <p className="text-sm text-primary/70 dark:text-slate-400">{emptyHint}</p>}
+      <div className="grid gap-3">
+        {form[field].map((row, idx) => (
+          <div key={idx} className={`grid ${sexOptions ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"} gap-2 items-end`}>
+            {sexOptions && (
+              <div>
+                <label className={labelCls}>Cinsiyet</label>
+                <select
+                  value={row.sex}
+                  onChange={(e) => setRow(field, idx, { sex: e.target.value })}
+                  className={`mt-1 w-full rounded-xl p-2 border border-subtle ${inputCls}`}
+                >
+                  <option value="male">{sexOptions[0]}</option>
+                  <option value="female">{sexOptions[1]}</option>
+                </select>
+              </div>
+            )}
+            <div>
+              <label className={labelCls}>{aLabel}</label>
+              <NumberInput className={inputCls} valueDigits={row[aField]} onChangeDigits={(v) => setRow(field, idx, { [aField]: v })} placeholder="0" />
+            </div>
+            <div>
+              <label className={labelCls}>{bLabel}</label>
+              <NumberInput className={inputCls} valueDigits={row[bField]} onChangeDigits={(v) => setRow(field, idx, { [bField]: v })} placeholder="0" />
+            </div>
+            <div className="flex justify-end">
+              <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm" onClick={() => delRow(field, idx)}>
+                Sil
+              </button>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
   return (
-    <div className="min-h-[100vh] min-h-[100dvh] bg-light text-ink">
-      <Header onOpenAbout={() => setAboutOpen(true)} />
+    <div className="min-h-[100vh] min-h-[100dvh] bg-light text-ink dark:bg-slate-900 dark:text-slate-100">
+      <Header onOpenAbout={() => setAboutOpen(true)} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />
 
       {/* Side rail ads (desktop) — içerik oluşmadan gösterme (policy) */}
       {result.rows.length > 0 && (
         <>
           <div className="no-print hidden xl:block fixed left-4 top-28 space-y-4 z-0">
-            <GoogleAd slot="1234567890" style={{ width: 160, height: 600 }} />
+            <GoogleAd slot={import.meta.env.VITE_GADS_SLOT_LEFT || "1234567890"} style={{ width: 160, height: 600 }} />
           </div>
           <div className="no-print hidden xl:block fixed right-4 top-28 space-y-4 z-0">
-            <GoogleAd slot="1234567891" style={{ width: 160, height: 600 }} />
+            <GoogleAd slot={import.meta.env.VITE_GADS_SLOT_RIGHT || "1234567891"} style={{ width: 160, height: 600 }} />
           </div>
         </>
       )}
 
-      <main className="max-w-6xl mx-auto px-4 py-6 pb-24 md:pb-12 grid md:grid-cols-2 gap-6">
+      <main className="max-w-6xl mx-auto px-4 py-6 pb-28 md:pb-12 grid md:grid-cols-2 gap-6">
         {/* Girdiler */}
-        <section className="bg-paper rounded-2xl p-5 shadow-soft border border-subtle">
-          <h2 className="text-lg font-semibold mb-4 text-primary">Girdiler</h2>
-
-          {/* Tereke */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm text-primary/80">Brüt miras (tereke)</label>
-              <NumberInput valueDigits={gross} onChangeDigits={setGross} />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Defin giderleri</label>
-              <NumberInput valueDigits={funeral} onChangeDigits={setFuneral} />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Borç / Mehir</label>
-              <NumberInput valueDigits={debts} onChangeDigits={setDebts} />
+        <section className={sectionCls}>
+          <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
+            <h2 className="text-lg font-semibold text-primary dark:text-slate-100">Girdiler</h2>
+            {/* Senaryo kaydet/yükle */}
+            <div className="no-print flex items-center gap-1.5 text-sm flex-wrap">
+              <input
+                value={scenarioName}
+                onChange={(e) => setScenarioName(e.target.value)}
+                placeholder="Senaryo adı"
+                className={`w-28 rounded-lg px-2 py-1.5 border border-subtle ${inputCls}`}
+              />
+              <button type="button" onClick={onSaveScenario} className="px-2 py-1.5 rounded-lg bg-secondary text-white" title="Mevcut girdileri kaydet">
+                Kaydet
+              </button>
+              {scenarios.length > 0 && (
+                <>
+                  <select
+                    value={selectedScenario}
+                    onChange={(e) => onLoadScenario(e.target.value)}
+                    className={`max-w-36 rounded-lg px-2 py-1.5 border border-subtle ${inputCls}`}
+                    title="Kayıtlı senaryoyu yükle"
+                  >
+                    <option value="">Kayıtlı…</option>
+                    {scenarios.map((s) => (
+                      <option key={s.id} value={s.id}>{s.name}</option>
+                    ))}
+                  </select>
+                  {selectedScenario && (
+                    <button type="button" onClick={onDeleteScenario} className="px-2 py-1.5 rounded-lg bg-red-500 text-white" title="Seçili senaryoyu sil">
+                      <i className="fa-solid fa-trash-can"></i>
+                    </button>
+                  )}
+                </>
+              )}
             </div>
           </div>
 
-          {/* Eş ve Cinsiyet */}
-          <div className="mt-6">
-            <h3 className="font-semibold text-primary mb-2">Eş ve Cinsiyet</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
-              <div className="flex items-center gap-3">
-                <span className="text-sm text-primary/80">Muris cinsiyeti</span>
-                <label className="text-sm inline-flex items-center gap-1">
-                  <input type="radio" name="sex" checked={decedentSex==='male'} onChange={()=>setDecedentSex('male')} /> Erkek
-                </label>
-                <label className="text-sm inline-flex items-center gap-1">
-                  <input type="radio" name="sex" checked={decedentSex==='female'} onChange={()=>setDecedentSex('female')} /> Kadın
-                </label>
+          {/* Girdi doğrulama uyarıları */}
+          {inputWarnings.length > 0 && (
+            <div className="mb-3 grid gap-2">
+              {inputWarnings.map((w, i) => (
+                <div key={i} className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 p-2.5 text-sm text-amber-900 dark:text-amber-200">
+                  <i className="fa-solid fa-circle-info mr-1.5 text-amber-600 dark:text-amber-400"></i>
+                  {w}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* 1) Tereke */}
+          <details open className={groupCls}>
+            <summary className={summaryCls}>
+              <span><i className="fa-solid fa-coins mr-2 text-accent"></i>Tereke</span>
+              <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
+            </summary>
+            <div className="p-3 pt-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className={labelCls}>Brüt miras (tereke)</label>
+                <NumberInput className={inputCls} valueDigits={form.gross} onChangeDigits={upd("gross")} />
+              </div>
+              <div>
+                <label className={labelCls}>Defin giderleri</label>
+                <NumberInput className={inputCls} valueDigits={form.funeral} onChangeDigits={upd("funeral")} />
+              </div>
+              <div>
+                <label className={labelCls}>Borç / Mehir</label>
+                <NumberInput className={inputCls} valueDigits={form.debts} onChangeDigits={upd("debts")} />
+              </div>
+            </div>
+          </details>
+
+          {/* 2) Aile: eş, çocuklar, ebeveyn */}
+          <details open className={groupCls}>
+            <summary className={summaryCls}>
+              <span><i className="fa-solid fa-people-roof mr-2 text-accent"></i>Eş, Çocuklar ve Ebeveyn</span>
+              <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
+            </summary>
+            <div className="p-3 pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
+                <div className="flex items-center gap-3">
+                  <span className={labelCls}>Muris cinsiyeti</span>
+                  <label className="text-sm inline-flex items-center gap-1">
+                    <input type="radio" name="sex" checked={form.decedentSex === "male"} onChange={() => upd("decedentSex")("male")} /> Erkek
+                  </label>
+                  <label className="text-sm inline-flex items-center gap-1">
+                    <input type="radio" name="sex" checked={form.decedentSex === "female"} onChange={() => upd("decedentSex")("female")} /> Kadın
+                  </label>
+                </div>
+
+                {form.decedentSex === "male" ? (
+                  <div>
+                    <label className={labelCls}>Eş sayısı</label>
+                    <NumberInput className={inputCls} valueDigits={form.wivesCount} onChangeDigits={upd("wivesCount")} placeholder="0" />
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <input id="husbandExists" type="checkbox" className="accent-secondary" checked={form.husbandExists} onChange={updChecked("husbandExists")} />
+                    <label htmlFor="husbandExists" className={labelCls}>Eşi (koca) var</label>
+                  </div>
+                )}
               </div>
 
-              {decedentSex==='male' ? (
+              <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className="text-sm text-primary/80">Eş sayısı</label>
-                  <NumberInput valueDigits={wivesCount} onChangeDigits={setWivesCount} placeholder="0" />
+                  <label className={labelCls}>Oğul sayısı (yaşayan)</label>
+                  <NumberInput className={inputCls} valueDigits={form.sons} onChangeDigits={upd("sons")} placeholder="0" />
                 </div>
-              ) : (
+                <div>
+                  <label className={labelCls}>Kız sayısı (yaşayan)</label>
+                  <NumberInput className={inputCls} valueDigits={form.daughters} onChangeDigits={upd("daughters")} placeholder="0" />
+                </div>
+              </div>
+
+              {renderHatRows({
+                field: "deceasedChildren",
+                title: "Vefat eden çocuklar (temsil için torun bilgisi)",
+                emptyRow: { sex: "male", grandsons: "", granddaughters: "" },
+                sexOptions: ["Oğul", "Kız"],
+                aField: "grandsons",
+                bField: "granddaughters",
+                aLabel: "Torun (erkek)",
+                bLabel: "Torun (kız)",
+                emptyHint: "Vefat eden çocuk yoksa boş bırakın.",
+              })}
+
+              <div className="mt-4 border-t border-subtle dark:border-slate-700 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex items-center gap-2">
-                  <input id="husbandExists" type="checkbox" className="accent-secondary" checked={husbandExists} onChange={(e)=>setHusbandExists(e.target.checked)} />
-                  <label htmlFor="husbandExists" className="text-sm text-primary/80">Eşi (koca) var</label>
+                  <input id="motherExists" type="checkbox" className="accent-secondary" checked={form.motherExists} onChange={updChecked("motherExists")} />
+                  <label htmlFor="motherExists" className={labelCls}>Anne hayatta</label>
                 </div>
-              )}
+                <div className="flex items-center gap-2">
+                  <input id="fatherExists" type="checkbox" className="accent-secondary" checked={form.fatherExists} onChange={updChecked("fatherExists")} />
+                  <label htmlFor="fatherExists" className={labelCls}>Baba hayatta</label>
+                </div>
+              </div>
             </div>
-          </div>
+          </details>
 
-          {/* Çocuklar */}
-          <div className="mt-6">
-            <h3 className="font-semibold text-primary mb-2">Çocuklar (yaşayan)</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm text-primary/80">Oğul sayısı</label>
-                <NumberInput valueDigits={sons} onChangeDigits={setSons} placeholder="0" />
+          {/* 3) Kardeşler */}
+          <details open className={groupCls}>
+            <summary className={summaryCls}>
+              <span><i className="fa-solid fa-people-group mr-2 text-accent"></i>Kardeşler</span>
+              <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
+            </summary>
+            <div className="p-3 pt-0">
+              <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <div>
+                  <label className={labelCls} title="Ana-bir kardeş (toplam)">Ana-bir (toplam)</label>
+                  <NumberInput className={inputCls} valueDigits={form.maternalSiblings} onChangeDigits={upd("maternalSiblings")} placeholder="0" />
+                </div>
+                <div>
+                  <label className={labelCls}>Öz erkek</label>
+                  <NumberInput className={inputCls} valueDigits={form.fullBrothers} onChangeDigits={upd("fullBrothers")} placeholder="0" />
+                </div>
+                <div>
+                  <label className={labelCls}>Öz kız</label>
+                  <NumberInput className={inputCls} valueDigits={form.fullSisters} onChangeDigits={upd("fullSisters")} placeholder="0" />
+                </div>
+                <div>
+                  <label className={labelCls}>Baba-bir erkek</label>
+                  <NumberInput className={inputCls} valueDigits={form.halfPatBrothers} onChangeDigits={upd("halfPatBrothers")} placeholder="0" />
+                </div>
+                <div>
+                  <label className={labelCls}>Baba-bir kız</label>
+                  <NumberInput className={inputCls} valueDigits={form.halfPatSisters} onChangeDigits={upd("halfPatSisters")} placeholder="0" />
+                </div>
               </div>
-              <div>
-                <label className="text-sm text-primary/80">Kız sayısı</label>
-                <NumberInput valueDigits={daughters} onChangeDigits={setDaughters} placeholder="0" />
-              </div>
-            </div>
-            {/* Vefat eden çocuklar ve torun girişi */}
-            <div className="mt-4 border-t pt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-primary">Vefat eden çocuklar (temsil için torun bilgisi)</h4>
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg bg-secondary text-white text-sm"
-                  onClick={() => setDeceasedChildren([...deceasedChildren, { sex: 'male', grandsons: '', granddaughters: '' }])}
-                >Satır ekle</button>
-              </div>
-              {deceasedChildren.length === 0 && (
-                <p className="text-sm text-primary/70">Vefat eden çocuk yoksa boş bırakın.</p>
-              )}
-              <div className="grid gap-3">
-                {deceasedChildren.map((row, idx) => (
-                  <div key={idx} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
-                    <div>
-                      <label className="text-sm text-primary/80">Cinsiyet</label>
-                      <select
-                        value={row.sex}
-                        onChange={(e)=>{
-                          const v = e.target.value; const arr=[...deceasedChildren]; arr[idx]={...arr[idx], sex:v}; setDeceasedChildren(arr);
-                        }}
-                        className="mt-1 w-full rounded-xl p-2 border border-subtle"
-                      >
-                        <option value="male">Oğul</option>
-                        <option value="female">Kız</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Torun (erkek)</label>
-                      <NumberInput
-                        valueDigits={row.grandsons}
-                        onChangeDigits={(v)=>{ const arr=[...deceasedChildren]; arr[idx]={...arr[idx], grandsons:v}; setDeceasedChildren(arr); }}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Torun (kız)</label>
-                      <NumberInput
-                        valueDigits={row.granddaughters}
-                        onChangeDigits={(v)=>{ const arr=[...deceasedChildren]; arr[idx]={...arr[idx], granddaughters:v}; setDeceasedChildren(arr); }}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm"
-                        onClick={()=>{ const arr=[...deceasedChildren]; arr.splice(idx,1); setDeceasedChildren(arr); }}
-                      >Sil</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          {/* Torunlar (toplu) kaldırıldı — temsil satırları kullanılacak */}
-
-          {/* Ebeveyn */}
-          <div className="mt-6">
-            <h3 className="font-semibold text-primary mb-2">Ebeveyn</h3>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="flex items-center gap-2">
-                <input id="motherExists" type="checkbox" className="accent-secondary" checked={motherExists} onChange={(e)=>setMotherExists(e.target.checked)} />
-                <label htmlFor="motherExists" className="text-sm text-primary/80">Anne hayatta</label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input id="fatherExists" type="checkbox" className="accent-secondary" checked={fatherExists} onChange={(e)=>setFatherExists(e.target.checked)} />
-                <label htmlFor="fatherExists" className="text-sm text-primary/80">Baba hayatta</label>
-              </div>
+              {renderHatRows({
+                field: "deceasedFullSiblings",
+                title: "Vefat eden öz kardeşler",
+                emptyRow: { sex: "male", sons: "", daughters: "" },
+                sexOptions: ["Öz erkek", "Öz kız"],
+                aField: "sons",
+                bField: "daughters",
+                aLabel: "Çocuk (erkek)",
+                bLabel: "Çocuk (kız)",
+                emptyHint: "Vefat eden öz kardeş yoksa boş bırakın.",
+              })}
+              {renderHatRows({
+                field: "deceasedHalfPatSiblings",
+                title: "Vefat eden baba-bir kardeşler",
+                emptyRow: { sex: "male", sons: "", daughters: "" },
+                sexOptions: ["Baba-bir erkek", "Baba-bir kız"],
+                aField: "sons",
+                bField: "daughters",
+                aLabel: "Çocuk (erkek)",
+                bLabel: "Çocuk (kız)",
+                emptyHint: "Vefat eden baba-bir kardeş yoksa boş bırakın.",
+              })}
+              {renderHatRows({
+                field: "deceasedMaternalSiblings",
+                title: "Vefat eden anne-bir kardeşler",
+                emptyRow: { sons: "", daughters: "" },
+                sexOptions: null,
+                aField: "sons",
+                bField: "daughters",
+                aLabel: "Çocuk (erkek)",
+                bLabel: "Çocuk (kız)",
+                emptyHint: "Vefat eden anne-bir kardeş yoksa boş bırakın.",
+              })}
             </div>
-          </div>
-
-          {/* Kardeşler (yaşayan) */}
-          <div className="mt-6">
-            <h3 className="font-semibold text-primary mb-2">Kardeşler (yaşayan)</h3>
-          {/* Mobile stacked fields */}
-          <div className="sm:hidden grid gap-3 mt-2">
-            <div>
-              <label className="text-sm text-primary/80">Ana-bir (toplam)</label>
-              <NumberInput valueDigits={maternalSiblings} onChangeDigits={setMaternalSiblings} placeholder="0" />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Öz erkek</label>
-              <NumberInput valueDigits={fullBrothers} onChangeDigits={setFullBrothers} placeholder="0" />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Öz kız</label>
-              <NumberInput valueDigits={fullSisters} onChangeDigits={setFullSisters} placeholder="0" />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Baba-bir erkek</label>
-              <NumberInput valueDigits={halfPatBrothers} onChangeDigits={setHalfPatBrothers} placeholder="0" />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Baba-bir kız</label>
-              <NumberInput valueDigits={halfPatSisters} onChangeDigits={setHalfPatSisters} placeholder="0" />
-            </div>
-          </div>
-
-          {/* Desktop/tablet: scrollable table */}
-          <div className="mt-2 overflow-x-auto touch-pan-x hidden sm:block">
-            <table className="min-w-max text-sm">
-                <thead className="text-primary/80">
-                  <tr>
-                    <th className="text-left p-1 whitespace-nowrap" title="Ana-bir kardeş (toplam)">Ana-bir</th>
-                    <th className="text-left p-1 whitespace-nowrap" title="Öz erkek kardeş">Öz erkek</th>
-                    <th className="text-left p-1 whitespace-nowrap" title="Öz kız kardeş">Öz kız</th>
-                    <th className="text-left p-1 whitespace-nowrap" title="Baba-bir erkek kardeş">Baba-bir erkek</th>
-                    <th className="text-left p-1 whitespace-nowrap" title="Baba-bir kız kardeş">Baba-bir kız</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr className="align-top">
-                    <td className="p-1"><NumberInput valueDigits={maternalSiblings} onChangeDigits={setMaternalSiblings} placeholder="0" /></td>
-                    <td className="p-1"><NumberInput valueDigits={fullBrothers} onChangeDigits={setFullBrothers} placeholder="0" /></td>
-                    <td className="p-1"><NumberInput valueDigits={fullSisters} onChangeDigits={setFullSisters} placeholder="0" /></td>
-                    <td className="p-1"><NumberInput valueDigits={halfPatBrothers} onChangeDigits={setHalfPatBrothers} placeholder="0" /></td>
-                    <td className="p-1"><NumberInput valueDigits={halfPatSisters} onChangeDigits={setHalfPatSisters} placeholder="0" /></td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            {/* Vefat eden öz kardeşler */}
-            <div className="mt-4 border-t pt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-primary">Vefat eden öz kardeşler</h4>
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg bg-secondary text-white text-sm"
-                  onClick={() => setDeceasedFullSiblings([...deceasedFullSiblings, { sex:'male', sons:'', daughters:'' }])}
-                >Satır ekle</button>
-              </div>
-              {deceasedFullSiblings.length === 0 && (
-                <p className="text-sm text-primary/70">Vefat eden öz kardeş yoksa boş bırakın.</p>
-              )}
-              <div className="grid gap-3">
-                {deceasedFullSiblings.map((row, idx) => (
-                  <div key={idx} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
-                    <div>
-                      <label className="text-sm text-primary/80">Cinsiyet</label>
-                      <select
-                        value={row.sex}
-                        onChange={(e)=>{ const arr=[...deceasedFullSiblings]; arr[idx]={...arr[idx], sex:e.target.value}; setDeceasedFullSiblings(arr); }}
-                        className="mt-1 w-full rounded-xl p-2 border border-subtle"
-                      >
-                        <option value="male">Öz erkek</option>
-                        <option value="female">Öz kız</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (erkek)</label>
-                      <NumberInput valueDigits={row.sons} onChangeDigits={(v)=>{ const arr=[...deceasedFullSiblings]; arr[idx]={...arr[idx], sons:v}; setDeceasedFullSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (kız)</label>
-                      <NumberInput valueDigits={row.daughters} onChangeDigits={(v)=>{ const arr=[...deceasedFullSiblings]; arr[idx]={...arr[idx], daughters:v}; setDeceasedFullSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div className="flex justify-end">
-                      <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm" onClick={()=>{ const arr=[...deceasedFullSiblings]; arr.splice(idx,1); setDeceasedFullSiblings(arr); }}>Sil</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Vefat eden baba-bir kardeşler */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-primary">Vefat eden baba-bir kardeşler</h4>
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg bg-secondary text-white text-sm"
-                  onClick={() => setDeceasedHalfPatSiblings([...deceasedHalfPatSiblings, { sex:'male', sons:'', daughters:'' }])}
-                >Satır ekle</button>
-              </div>
-              {deceasedHalfPatSiblings.length === 0 && (
-                <p className="text-sm text-primary/70">Vefat eden baba-bir kardeş yoksa boş bırakın.</p>
-              )}
-              <div className="grid gap-3">
-                {deceasedHalfPatSiblings.map((row, idx) => (
-                  <div key={idx} className="grid grid-cols-2 sm:grid-cols-4 gap-2 items-end">
-                    <div>
-                      <label className="text-sm text-primary/80">Cinsiyet</label>
-                      <select
-                        value={row.sex}
-                        onChange={(e)=>{ const arr=[...deceasedHalfPatSiblings]; arr[idx]={...arr[idx], sex:e.target.value}; setDeceasedHalfPatSiblings(arr); }}
-                        className="mt-1 w-full rounded-xl p-2 border border-subtle"
-                      >
-                        <option value="male">Baba-bir erkek</option>
-                        <option value="female">Baba-bir kız</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (erkek)</label>
-                      <NumberInput valueDigits={row.sons} onChangeDigits={(v)=>{ const arr=[...deceasedHalfPatSiblings]; arr[idx]={...arr[idx], sons:v}; setDeceasedHalfPatSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (kız)</label>
-                      <NumberInput valueDigits={row.daughters} onChangeDigits={(v)=>{ const arr=[...deceasedHalfPatSiblings]; arr[idx]={...arr[idx], daughters:v}; setDeceasedHalfPatSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div className="flex justify-end">
-                      <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm" onClick={()=>{ const arr=[...deceasedHalfPatSiblings]; arr.splice(idx,1); setDeceasedHalfPatSiblings(arr); }}>Sil</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Vefat eden anne-bir kardeşler */}
-            <div className="mt-4">
-              <div className="flex items-center justify-between mb-2">
-                <h4 className="font-medium text-primary">Vefat eden anne-bir kardeşler</h4>
-                <button
-                  type="button"
-                  className="px-2 py-1 rounded-lg bg-secondary text-white text-sm"
-                  onClick={() => setDeceasedMaternalSiblings([...deceasedMaternalSiblings, { sons:'', daughters:'' }])}
-                >Satır ekle</button>
-              </div>
-              {deceasedMaternalSiblings.length === 0 && (
-                <p className="text-sm text-primary/70">Vefat eden anne-bir kardeş yoksa boş bırakın.</p>
-              )}
-              <div className="grid gap-3">
-                {deceasedMaternalSiblings.map((row, idx) => (
-                  <div key={idx} className="grid grid-cols-3 gap-2 items-end">
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (erkek)</label>
-                      <NumberInput valueDigits={row.sons} onChangeDigits={(v)=>{ const arr=[...deceasedMaternalSiblings]; arr[idx]={...arr[idx], sons:v}; setDeceasedMaternalSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div>
-                      <label className="text-sm text-primary/80">Çocuk (kız)</label>
-                      <NumberInput valueDigits={row.daughters} onChangeDigits={(v)=>{ const arr=[...deceasedMaternalSiblings]; arr[idx]={...arr[idx], daughters:v}; setDeceasedMaternalSiblings(arr); }} placeholder="0" />
-                    </div>
-                    <div className="flex justify-end">
-                      <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm" onClick={()=>{ const arr=[...deceasedMaternalSiblings]; arr.splice(idx,1); setDeceasedMaternalSiblings(arr); }}>Sil</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          {/* Yeğenler (toplu) kaldırıldı — temsil satırları kullanılacak */}
+          </details>
 
           {/* Aksiyonlar */}
-          <div className="flex items-center justify-center gap-3 pt-6">
-            <button onClick={()=>window.print()} className="px-4 py-2 rounded-xl bg-accent text-ink hover:opacity-90 shadow-sm">
+          <div className="no-print flex items-center justify-center gap-3 pt-6 flex-wrap">
+            <button onClick={shareLink} className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90 shadow-sm" title="Bu hesabın linkini paylaş">
+              <i className="fa-solid fa-share-nodes mr-1.5"></i>Paylaş
+            </button>
+            <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-accent text-ink hover:opacity-90 shadow-sm">
               Yazdır / PDF
             </button>
             <button onClick={clearForm} className="px-4 py-2 rounded-xl bg-secondary text-white hover:opacity-90 shadow-sm" title="Tüm alanları sıfırla">
               Temizle
             </button>
           </div>
+          {shareMsg && (
+            <p className="text-center text-sm mt-2 text-secondary dark:text-teal-300" role="status">
+              <i className="fa-solid fa-check mr-1"></i>{shareMsg}
+            </p>
+          )}
         </section>
 
-        <ResultTable result={result} onOpenVerses={() => setVersesOpen(true)} />
+        {/* Sonuç */}
+        <div id="sonuc">
+          <ResultTable result={result} onOpenVerses={() => setVersesOpen(true)} />
+          <StepsPanel steps={result.steps} />
+        </div>
       </main>
+
+      {/* Mobil yapışkan özet çubuğu */}
+      {result.rows.length > 0 && (
+        <a
+          href="#sonuc"
+          className="no-print md:hidden fixed bottom-0 inset-x-0 z-20 bg-primary text-white px-4 py-3 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,.15)] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
+        >
+          <span className="text-sm opacity-90">Dağıtılan</span>
+          <span className="font-semibold">
+            {result.sumAllocated.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺
+          </span>
+          <span className="text-sm underline">Sonuca git</span>
+        </a>
+      )}
 
       <Footer />
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
