@@ -123,6 +123,13 @@ export default function ResultTable({ result }) {
           </div>
         </div>
       </div>
+
+      {/* Yazdırılan çıktıda yasal uyarı (ekranda Footer'da zaten var) */}
+      <p className="hidden print:block mt-4 pt-2 border-t text-[11px] text-black/70">
+        Yasal Uyarı: Bu belge feraiz.com hesaplayıcısı ile bilgilendirme amaçlı üretilmiştir; yasal veya dinî
+        danışmanlık niteliği taşımaz. Nihai kararlarınız için yetkili mercilere ve uzmanlara danışınız.
+        {" "}feraiz.com — {new Date().toLocaleDateString("tr-TR")}
+      </p>
     </section>
   );
 }

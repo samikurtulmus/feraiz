@@ -24,13 +24,13 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
               <li><a href={import.meta.env.BASE_URL + 'meal/'} className="hover:underline text-light">Ayet Panosu</a></li>
               <li>
                 <a
-                  href="https://www.suleymaniyevakfimeali.com/"
+                  href="https://ayet.cc/"
                   target="_blank"
-                  rel="noreferrer"
+                  rel="noopener noreferrer"
                   className="hover:underline text-light"
                 >
-                  <span className="md:hidden">SV Kur’an Meali</span>
-                  <span className="hidden md:inline">Süleymaniye Vakfı Kur’an-ı Kerim Meali</span>
+                  <span className="md:hidden">Kur’an Meali</span>
+                  <span className="hidden md:inline">Kur’an-ı Kerim Meali (ayet.cc)</span>
                 </a>
               </li>
               <li><button onClick={onOpenAbout} className="hover:underline">Hakkında</button></li>
