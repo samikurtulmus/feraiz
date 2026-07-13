@@ -64,6 +64,19 @@ export default function App() {
     localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
+  // Yazdırma/PDF her zaman açık temada yapılır: koyu temanın açık renkli
+  // metinleri beyaz kağıtta okunmaz hâle geliyor.
+  useEffect(() => {
+    const beforePrint = () => document.documentElement.classList.remove("dark");
+    const afterPrint = () => document.documentElement.classList.toggle("dark", theme === "dark");
+    window.addEventListener("beforeprint", beforePrint);
+    window.addEventListener("afterprint", afterPrint);
+    return () => {
+      window.removeEventListener("beforeprint", beforePrint);
+      window.removeEventListener("afterprint", afterPrint);
+    };
+  }, [theme]);
+
   // --- Modallar & bildirimler ---
   const [aboutOpen, setAboutOpen] = useState(false);
   const [versesOpen, setVersesOpen] = useState(false);
