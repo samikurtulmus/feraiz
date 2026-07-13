@@ -1,6 +1,8 @@
 import React from "react";
+import { roundRowsToKurus } from "../lib/feraiz.js";
 
-const fmt = (n) => Number(n).toLocaleString("tr-TR");
+const fmt = (n) =>
+  Number(n).toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function ResultTable({ result }) {
   return (
@@ -38,15 +40,7 @@ export default function ResultTable({ result }) {
 
       <div className="grid grid-cols-2 gap-3 text-sm">
         <div className="rounded-xl p-3 border border-subtle bg-white/70">
-          <div className="text-primary/80">Net (Vasiyet/Borç öncesi)</div>
-          <div className="text-xl font-semibold">{fmt(result.netBeforeWill)} ₺</div>
-        </div>
-        <div className="rounded-xl p-3 border border-subtle bg-white/70">
-          <div className="text-primary/80">Vasiyet/Borç indirimi</div>
-          <div className="text-xl font-semibold">{fmt(result.will)} ₺</div>
-        </div>
-        <div className="rounded-xl p-3 border border-subtle bg-white/70">
-          <div className="text-primary/80">Mirasçılara Taban</div>
+          <div className="text-primary/80">Net Tereke (dağıtılacak)</div>
           <div className="text-xl font-semibold">{fmt(result.netForHeirs)} ₺</div>
         </div>
         <div className="rounded-xl p-3 border border-subtle bg-white/70">
@@ -54,6 +48,18 @@ export default function ResultTable({ result }) {
           <div className="text-xl font-semibold">{fmt(result.sumAllocated)} ₺</div>
         </div>
       </div>
+
+      {/* Motor uyarıları (yok sayılan temsil satırları, dağıtılamayan tutar vb.) */}
+      {result.warnings?.length > 0 && (
+        <div className="mt-3 grid gap-2">
+          {result.warnings.map((w, i) => (
+            <div key={i} className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 p-3 text-sm text-amber-900">
+              <i className="fa-solid fa-triangle-exclamation mt-0.5 text-amber-600"></i>
+              <span>{w}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="mt-4 overflow-hidden rounded-2xl border border-subtle">
         <table className="w-full text-sm">
@@ -71,8 +77,8 @@ export default function ResultTable({ result }) {
                 <td colSpan={4} className="p-4 text-center text-primary/70">Henüz pay yok. Girdileri doldurun.</td>
               </tr>
             )}
-            {result.rows.map((r, idx) => (
-              <tr key={idx} className="odd:bg-light/60">
+            {roundRowsToKurus(result.rows, result.netForHeirs).map((r, idx) => (
+              <tr key={idx} className={r.warning ? "bg-amber-50 text-amber-900" : "odd:bg-light/60"}>
                 <td className="p-2">{r.heir}</td>
                 <td className="p-2">{r.fraction}</td>
                 <td className="p-2 text-primary/70">{r.basis}</td>

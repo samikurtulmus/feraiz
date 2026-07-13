@@ -15,7 +15,6 @@ export default function App() {
   const [gross, setGross] = useState("");
   const [funeral, setFuneral] = useState("");
   const [debts, setDebts] = useState("");
-  const [bequest, setBequest] = useState("");
 
   // --- Eş & cinsiyet ---
   const [decedentSex, setDecedentSex] = useState("male"); // male|female
@@ -56,7 +55,6 @@ export default function App() {
     gross: toN(gross),
     funeral: toN(funeral),
     debts: toN(debts),
-    bequest: toN(bequest),
     decedentSex,
     husbandExists,
     wivesCount: toN(wivesCount),
@@ -79,7 +77,7 @@ export default function App() {
   const result = useMemo(() => computeDistribution(inputs), [JSON.stringify(inputs)]);
 
   const clearForm = () => {
-    setGross(""); setFuneral(""); setDebts(""); setBequest("");
+    setGross(""); setFuneral(""); setDebts("");
     setHusbandExists(false); setWivesCount("");
     setSons(""); setDaughters("");
     setMotherExists(false); setFatherExists(false);
@@ -127,10 +125,6 @@ export default function App() {
             <div>
               <label className="text-sm text-primary/80">Borç / Mehir</label>
               <NumberInput valueDigits={debts} onChangeDigits={setDebts} />
-            </div>
-            <div>
-              <label className="text-sm text-primary/80">Vasiyet (opsiyonel)</label>
-              <NumberInput valueDigits={bequest} onChangeDigits={setBequest} />
             </div>
           </div>
 

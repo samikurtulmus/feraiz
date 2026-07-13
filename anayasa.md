@@ -1,6 +1,6 @@
 # Feraiz.com Miras Hesaplama Anayasası ve Usulü Esasları
-**Son Güncelleme:** 16 Temmuz 2025  
-**Versiyon:** 2.6 (TEMSİL YOLUYLA MİRASÇILIK VE UI İYİLEŞTİRMELERİ)  
+**Son Güncelleme:** 13 Temmuz 2026  
+**Versiyon:** 2.7 (VASİYET ALANI KALDIRILDI, KAPSAM NETLEŞTİRİLDİ, MADDE 9 UYGULAMASI GÜÇLENDİRİLDİ)  
 **Kaynak:** Süleymaniye Vakfı Meali
 
 ---
@@ -296,6 +296,31 @@ Sonuçlar, aşağıdaki bilgileri içeren tabloda kullanıcıya sunulur:
 ---
 
 ---
+## MADDE 10: KAPSAM
+
+Bu hesaplama çalışması aşağıdaki mirasçı sınıflarını kapsar:
+- **Eş** (koca / hanımlar)
+- **Alt soy:** çocuklar ve temsil yoluyla torunlar (Madde 5.1)
+- **Üst soy:** anne ve baba
+- **Kardeşler:** öz, baba-bir ve anne-bir kardeşler; temsil yoluyla yeğenler
+
+**Kapsam dışı:** Dede/nine, amca/hala/dayı/teyze ve diğer uzak akrabaların payları
+bu çalışmanın konusu değildir ve hesaplayıcıda yer almaz.
+
+### 🔎 Temsil satırı geçerlilik kuralı (v2.7):
+Vefat etmiş bir mirasçı hattı, ancak **yaşayan temsilcisi (çocuğu) varsa** hesaba
+girer. Yaşayan temsilcisi olmayan hat; pay ağırlığına, alt soy tespitine ve kardeş
+varlığı tespitine **dahil edilmez** (aksi hâlde para ortada kalır ve senaryo yanlış
+belirlenir — Madde 9 ihlali). Bu tür satırlar kullanıcıya uyarı olarak bildirilir.
+
+### 📝 Vasiyet hakkında (v2.7):
+Uygulamada vasiyet alanı **kaldırılmıştır**. Bu çalışma yalnızca Kur'an'da
+belirlenmiş miras paylarının hesaplanmasını kapsar; vasiyet uygulaması kapsam
+dışıdır. Net miras Madde 2'deki gibi yalnız defin gideri ve borçlar (mehir dahil)
+düşülerek bulunur.
+
+---
+
 ## UYARI VE GELİŞTİRME NOTLARI
 
 ### ✅ ÇÖZÜLMÜŞ DURUM: ALT SOY MİRAS KURALI TAMAMEN NETLEŞTİRİLDİ
