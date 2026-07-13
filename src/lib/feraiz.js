@@ -315,18 +315,24 @@ export function computeDistribution(raw) {
     }
   }
 
-  // 5) Nihai kontrol (MADDE 9): dağıtılamayan kalan görünür yapılır
+  // 5) Nihai kontrol (MADDE 9): mirasçısı olmayan kalan amme malı olur (Madde 9.1)
+  // Kalan yalnız kan bağıyla mirasçı hiç yokken pozitif kalabilir
+  // (ör. sadece eş hayatta, ya da hiç mirasçı girilmedi).
   const sumAllocated = rows.reduce((a, r) => a + (r.amount || 0), 0);
+  const notes = [];
   if (remainder > 1e-9) {
     rows.push({
-      heir: "Dağıtılamayan tutar",
-      fraction: "—",
+      heir: "Devlet / ilgili otorite",
+      fraction: "(kalan)",
       amount: remainder,
-      basis: "Uyarı — girilen mirasçılarla dağıtılamadı (Madde 9)",
-      warning: true,
+      basis: "Amme malı — mirasçısı olmayan kalan (Madde 9.1)",
+      info: true,
     });
-    warnings.push(
-      `Dağıtılamayan tutar: ${fmtTL(remainder)} ₺. Girilen mirasçı bilgileriyle bu tutar paylaştırılamadı; girdileri kontrol edin.`
+    notes.push(
+      `Mirasçısı bulunmayan ${fmtTL(remainder)} ₺, amme malı olur; devlete / ilgili otoriteye kalır. (Kaynak: Süleymaniye Vakfı)`
+    );
+    steps.push(
+      `Mirasçısı olmayan kalan (${fmtTL(remainder)} ₺) amme malı olarak devlete / ilgili otoriteye ayrıldı (Madde 9.1)`
     );
   } else {
     remainder = 0;
@@ -335,7 +341,7 @@ export function computeDistribution(raw) {
     }
   }
 
-  return { netForHeirs, rows, sumAllocated, remainder, warnings, steps };
+  return { netForHeirs, rows, sumAllocated, remainder, warnings, notes, steps };
 }
 
 // Sunum katmanı: tutarları kuruşa yuvarlar; yuvarlama farkını en büyük kesir

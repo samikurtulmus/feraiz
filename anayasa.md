@@ -289,6 +289,15 @@ Bu durumda **Madde 8A** ve **Madde 8B** kuralları **birlikte** uygulanır:
 1. **Dağıtılan toplam tutar** = Net Miras ✓
 2. **"Kalan Tutar"** = Sıfır ✓
 
+### 🏛️ 9.1 Mirasçısı Olmayan Kalan — Amme Malı (v2.7):
+Tüm paylar ayrıldıktan sonra kalan miras için **hiçbir mirasçı yoksa** (örneğin
+yalnız eş hayatta ise, veya hiç mirasçı bulunmuyorsa), kalan tutar **amme malı**
+olur; **devlete / ilgili otoriteye** kalır.
+
+- Sonuç tablosunda bu tutar **"Devlet / ilgili otorite"** satırı olarak, açıklayıcı
+  bir bilgi notuyla birlikte gösterilir; hata/uyarı olarak sunulmaz.
+- **Kaynak:** Süleymaniye Vakfı (2026/07)
+
 ### 📊 Sunum Formatı:
 Sonuçlar, aşağıdaki bilgileri içeren tabloda kullanıcıya sunulur:
 

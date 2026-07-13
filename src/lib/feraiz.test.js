@@ -85,12 +85,13 @@ describe("MADDE 4 — Eşin önceliği", () => {
     checkInvariant(r);
   });
 
-  it("2 hanım, alt soy yok: toplam 1/4 → 1/8'er; kalan dağıtılamayan olarak raporlanır", () => {
+  it("2 hanım, alt soy yok: toplam 1/4 → 1/8'er; kalan amme malı (Devlet) olarak gösterilir", () => {
     const r = calc({ wivesCount: 2 });
     expect(amountOf(r, "Eş #1")).toBeCloseTo(NET / 8, 4);
     expect(amountOf(r, "Eş #2")).toBeCloseTo(NET / 8, 4);
     expect(r.remainder).toBeCloseTo((NET * 3) / 4, 4);
-    expect(r.rows.some((x) => x.warning)).toBe(true);
+    expect(amountOf(r, "Devlet / ilgili otorite")).toBeCloseTo((NET * 3) / 4, 4);
+    expect(r.notes.length).toBeGreaterThan(0);
     checkInvariant(r);
   });
 });
@@ -250,13 +251,23 @@ describe("MADDE 8C — Tam kelâle", () => {
   });
 });
 
-describe("MADDE 9 — Nihai kontrol", () => {
-  it("hiç mirasçı yok, net > 0: dağıtılamayan tutar uyarı satırı olarak görünür", () => {
+describe("MADDE 9 — Nihai kontrol ve amme malı (9.1)", () => {
+  it("yalnız koca hayatta: koca 1/2, kalan 1/2 amme malı (Devlet / ilgili otorite)", () => {
+    const r = calc({ decedentSex: "female", husbandExists: true });
+    expect(amountOf(r, "Eş (erkek)")).toBeCloseTo(NET / 2, 4);
+    expect(amountOf(r, "Devlet / ilgili otorite")).toBeCloseTo(NET / 2, 4);
+    const ammeRow = r.rows.find((x) => x.info);
+    expect(ammeRow.basis).toContain("Amme malı");
+    expect(r.notes.some((n) => n.includes("amme malı"))).toBe(true);
+    checkInvariant(r);
+  });
+
+  it("hiç mirasçı yok, net > 0: tamamı amme malı olarak görünür", () => {
     const r = calc({});
     expect(r.remainder).toBeCloseTo(NET, 4);
-    const warnRow = r.rows.find((x) => x.warning);
-    expect(warnRow).toBeTruthy();
-    expect(warnRow.amount).toBeCloseTo(NET, 4);
+    const ammeRow = r.rows.find((x) => x.info);
+    expect(ammeRow).toBeTruthy();
+    expect(ammeRow.amount).toBeCloseTo(NET, 4);
     checkInvariant(r);
   });
 });

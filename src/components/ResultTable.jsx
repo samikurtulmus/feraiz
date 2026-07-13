@@ -57,13 +57,25 @@ export default function ResultTable({ result }) {
         </div>
       </div>
 
-      {/* Motor uyarıları (yok sayılan temsil satırları, dağıtılamayan tutar vb.) */}
+      {/* Motor uyarıları (yok sayılan temsil satırları vb.) */}
       {result.warnings?.length > 0 && (
         <div className="mt-3 grid gap-2">
           {result.warnings.map((w, i) => (
             <div key={i} className="flex items-start gap-2 rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 p-3 text-sm text-amber-900 dark:text-amber-200">
               <i className="fa-solid fa-triangle-exclamation mt-0.5 text-amber-600 dark:text-amber-400"></i>
               <span>{w}</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Bilgi notları (amme malı açıklaması vb.) — uyarı değil, açıklama */}
+      {result.notes?.length > 0 && (
+        <div className="mt-3 grid gap-2">
+          {result.notes.map((n, i) => (
+            <div key={i} className="flex items-start gap-2 rounded-xl border border-sky-300 bg-sky-50 dark:bg-sky-950/40 dark:border-sky-800 p-3 text-sm text-sky-900 dark:text-sky-200">
+              <i className="fa-solid fa-circle-info mt-0.5 text-sky-600 dark:text-sky-400"></i>
+              <span>{n}</span>
             </div>
           ))}
         </div>
@@ -86,7 +98,16 @@ export default function ResultTable({ result }) {
               </tr>
             )}
             {rounded.map((r, idx) => (
-              <tr key={idx} className={r.warning ? "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200" : "odd:bg-light/60 dark:odd:bg-slate-800/80"}>
+              <tr
+                key={idx}
+                className={
+                  r.warning
+                    ? "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200"
+                    : r.info
+                    ? "bg-sky-50 text-sky-900 dark:bg-sky-950/40 dark:text-sky-200"
+                    : "odd:bg-light/60 dark:odd:bg-slate-800/80"
+                }
+              >
                 <td className="p-2 align-top">
                   {r.heir}
                   {!r.warning && result.netForHeirs > 0 && (
