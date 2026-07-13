@@ -111,8 +111,8 @@ export default {
       "Yasal Uyarı: Bu belge feraiz.com hesaplayıcısı ile bilgilendirme amaçlı üretilmiştir; yasal veya dinî danışmanlık niteliği taşımaz. Nihai kararlarınız için yetkili mercilere ve uzmanlara danışınız.",
 
     stepsTitle: "Hesap nasıl yapıldı? (adım adım)",
-    rulesLink: "Hesap Kuralları (Anayasa)",
-    rulesNote: "Tüm madde referansları hesaplama anayasasına aittir:",
+    rulesLink: "Hesaplama Kuralları",
+    rulesNote: "Tüm madde referansları hesaplama kuralları belgesine aittir:",
 
     footerRights: "Feraiz.com | Tüm hakları saklıdır.",
     footerContact: "İletişim",
@@ -124,7 +124,7 @@ export default {
 
     aboutTitle: "Hakkında",
     aboutP1:
-      "Feraiz.com, Kur'an-ı Kerim'in Nisâ Suresi'nde ve diğer ayetlerde yer alan miras hükümlerini esas alarak eğitim ve araştırma amacıyla hazırlanmış bir hesaplama aracıdır. Hesaplama mantığı, yayınlanmış \"anayasa\" kurallarına (eş payı önce, ebeveyn payları, alt soy ve temsil 2:1, kardeş temsili vb.) göre adım adım uygulanır ve sonuçlar şeffaf bir tabloda gösterilir.",
+      "Feraiz.com, Kur'an-ı Kerim'in Nisâ Suresi'nde ve diğer ayetlerde yer alan miras hükümlerini esas alarak eğitim ve araştırma amacıyla hazırlanmış bir hesaplama aracıdır. Hesaplama mantığı, yayınlanmış hesaplama kurallarına (eş payı önce, ebeveyn payları, alt soy ve temsil 2:1, kardeş temsili vb.) göre adım adım uygulanır ve sonuçlar şeffaf bir tabloda gösterilir.",
     aboutB1: "Temel dayanak: Nisâ 4/11, 4/12, 4/176 ve ilgili ayetler; Süleymaniye Vakfı meali.",
     aboutB2: "Hesap sırası: Defin/borç sonrası net → eş payı → ebeveyn payları → alt soy/temsil → (gerekirse) kardeş/temsil.",
     aboutB3: "Yuvarlama: Tutarlar kuruş/cent düzeyine yuvarlanır; toplam her zaman net terekeye eşittir.",

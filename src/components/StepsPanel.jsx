@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useLocale } from "../i18n/index.js";
 
 // Hesabın adım adım açıklaması — motorun ürettiği steps[] listesini
-// anayasa madde referanslarıyla birlikte gösterir.
+// kural maddesi referanslarıyla birlikte gösterir.
 export default function StepsPanel({ steps }) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
@@ -31,7 +31,7 @@ export default function StepsPanel({ steps }) {
           </ol>
           <p className="mt-3 text-xs text-primary/70 dark:text-slate-400">
             {t.rulesNote}{" "}
-            <a href={import.meta.env.BASE_URL + "anayasa.html"} target="_blank" rel="noopener" className="underline">
+            <a href={import.meta.env.BASE_URL + "kurallar.html"} target="_blank" rel="noopener" className="underline">
               {t.rulesLink}
             </a>
           </p>

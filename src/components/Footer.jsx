@@ -16,7 +16,7 @@ export default function Footer() {
           {" | "}
           <a href={import.meta.env.BASE_URL + 'terms.html'} className="underline">{t.footerTerms}</a>
           {" | "}
-          <a href={import.meta.env.BASE_URL + 'anayasa.html'} className="underline">{t.rulesLink}</a>
+          <a href={import.meta.env.BASE_URL + 'kurallar.html'} className="underline">{t.rulesLink}</a>
           {" | "}
           <a href="https://github.com/samikurtulmus/feraiz" className="underline" target="_blank" rel="noopener noreferrer">{t.footerSource}</a>
         </p>

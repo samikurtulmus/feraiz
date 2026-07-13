@@ -6,8 +6,8 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
   return (
     <header className="no-print sticky top-0 z-10 bg-primary text-light shadow-md w-full pt-[env(safe-area-inset-top)]">
       <div className="relative max-w-6xl mx-auto px-4 py-5 text-center pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
-        {/* Tema + dil (sağ üst; RTL'de otomatik sola geçer) */}
-        <div className="absolute end-4 top-4 flex items-center gap-2">
+        {/* Tema + dil: darda başlığın üstünde satır, geniş ekranda sağ üst köşede (RTL'de sola geçer) */}
+        <div className="flex justify-end items-center gap-2 mb-2 sm:mb-0 sm:absolute sm:end-4 sm:top-4">
           <select
             value={lang}
             onChange={(e) => setLang(e.target.value)}

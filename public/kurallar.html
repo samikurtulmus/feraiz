@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hesaplama Kuralları | Feraiz.com</title>
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <meta name="description" content="Feraiz.com miras hesaplama motorunun dayandığı kuralların tam metni" />
+  <link rel="canonical" href="https://feraiz.com/kurallar.html" />
+  <meta property="og:title" content="Hesaplama Kuralları | Feraiz.com" />
+  <meta property="og:description" content="Feraiz.com hesaplama kurallarının tam metni." />
+  <meta property="og:type" content="article" />
+  <meta property="og:locale" content="tr_TR" />
+  <meta property="og:url" content="https://feraiz.com/kurallar.html" />
+  <style>
+    :root{color-scheme: light dark}
+    body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; color:#0f172a; background:#F8F5EC}
+    .container{max-width:860px;margin:40px auto;padding:0 16px 64px}
+    h1{font-size:26px;color:#1F4D3F;line-height:1.3}
+    h2{font-size:20px;color:#1F4D3F;margin:32px 0 8px;border-bottom:2px solid #D9A441;padding-bottom:6px}
+    h3{font-size:16px;color:#2E7D64;margin:20px 0 6px}
+    p,li{line-height:1.75}
+    a{color:#1F4D3F}
+    blockquote{margin:12px 0;padding:10px 14px;background:#fff;border-inline-start:4px solid #D9A441;border-radius:8px}
+    table{border-collapse:collapse;width:100%;margin:12px 0}
+    th,td{border:1px solid #d9d4c5;padding:8px;text-align:start}
+    thead{background:#1F4D3F;color:#fff}
+    code{background:#efe9da;padding:1px 5px;border-radius:5px}
+    pre{background:#efe9da;padding:12px;border-radius:10px;overflow-x:auto}
+    hr{border:none;border-top:1px solid #d9d4c5;margin:28px 0}
+    .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px}
+    .back{display:inline-block;background:#2E7D64;color:#fff;text-decoration:none;padding:8px 14px;border-radius:10px;font-size:14px}
+    .note{background:#fff;border:1px solid #d9d4c5;border-radius:10px;padding:10px 14px;font-size:14px;margin:16px 0}
+    @media (prefers-color-scheme: dark){
+      body{background:#0f172a;color:#e2e8f0}
+      h1,h2,a{color:#a7d7c5}
+      h3{color:#7cc0a8}
+      blockquote,.note{background:#1e293b;border-color:#334155}
+      th,td{border-color:#334155}
+      code,pre{background:#1e293b}
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top">
+      <a class="back" href="/">← feraiz.com</a>
+    </div>
+    <div class="note">
+      Bu belge, feraiz.com hesaplama motorunun uyduğu kuralların <strong>tam ve bağlayıcı metnidir</strong>.
+      Hesaplayıcıdaki her sonuç bu maddelerle test edilerek doğrulanır. Belgenin aslı Türkçedir. /
+      <em>This document is the authoritative rule source of the feraiz.com calculator; the Turkish original prevails.</em>
+    </div>
+    <h1>Feraiz.com Hesaplama Kuralları</h1>
+<p><strong>Sürüm:</strong> 3.0 · <strong>Son güncelleme:</strong> 14 Temmuz 2026
+<strong>Kaynak:</strong> Kur&#39;an-ı Kerim (Nisâ 4/11, 4/12, 4/176 ve ilgili ayetler), Süleymaniye Vakfı meali ve açıklamaları</p>
+<p>Bu belge, feraiz.com hesaplama motorunun uyduğu kuralların tam ve bağlayıcı metnidir.
+Motor bu belgeden ayrışamaz: her madde otomatik testlerle doğrulanır ve hesap
+davranışını değiştiren her kod değişikliği, önce bu belgenin güncellenmesini gerektirir.</p>
+<p>Temel ilke, Nisâ Suresi&#39;nde belirtilen sınırlara uymak ve mirası hak sahipleri arasında
+<strong>para asla ortada kalmayacak</strong> şekilde adilce taksim etmektir (Madde 9).</p>
+<hr>
+<h2>Madde 1 — Amaç ve Bağlayıcılık</h2>
+<p>Bu belge, hesaplama motorunun dayandığı ilkeleri ve işleyiş sırasını belirler. Motor,
+buradaki maddelere, sıralamaya ve ilkelere tam olarak bağlıdır. Belgenin aslı Türkçedir;
+çeviriler bilgilendirme amaçlıdır.</p>
+<h2>Madde 2 — Terekenin Tespiti</h2>
+<p>Taksime başlamadan önce sırasıyla:</p>
+<p>a) Ölenin bıraktığı tüm mal varlığı (<strong>brüt tereke</strong>) tespit edilir.
+b) Defin giderleri düşülür.
+c) Bilinen borçlar düşülür; vefat eden erkekse eşine ödenmemiş <strong>mehir borcu</strong> da borçtandır.
+d) <strong>Net miras = Brüt tereke − (defin giderleri + borçlar)</strong></p>
+<p>Net miras sıfır veya negatifse taksim yapılmaz; kullanıcı bilgilendirilir.</p>
+<h2>Madde 3 — Mirasçılık Hiyerarşisi (Senaryo Belirleme)</h2>
+<p>Mirasçılar tespit edilirken aşağıdaki sıra izlenir; üstteki şart sağlanıyorsa alttaki
+senaryolar uygulanmaz:</p>
+<p>a) <strong>Alt soy (fürû) varsa</strong> — hayatta çocuk veya (yaşayan torunu olan) vefat etmiş çocuk hattı → Madde 6
+b) <strong>Alt soy yok, anne ve/veya baba hayattaysa</strong> → Madde 7
+c) <strong>Kelâle</strong> (alt soy ve üst soy yok) → Madde 8</p>
+<p><strong>Temsil satırı geçerlilik kuralı:</strong> Vefat etmiş bir mirasçı hattı, ancak <strong>yaşayan
+temsilcisi (çocuğu) varsa</strong> hesaba girer. Yaşayan temsilcisi olmayan hat; pay ağırlığına,
+alt soy tespitine ve kardeş varlığı tespitine dahil edilmez (aksi hâlde para ortada kalır
+ve senaryo yanlış belirlenir). Bu tür satırlar kullanıcıya uyarıyla bildirilir.</p>
+<h2>Madde 4 — Eşin Önceliği (Avliyye&#39;nin Çözümü)</h2>
+<p>Eş, kan bağıyla değil akit bağıyla mirasçıdır (Nisâ 4/33); bu yüzden payı diğer
+mirasçılardan <strong>önce</strong>, doğrudan net miras üzerinden ayrılır. Diğer tüm paylar, eş payı
+düşüldükten sonra kalan üzerinden hesaplanır. Bu kural, pay toplamının 1&#39;i aşması
+(avliyye) sorununu kendiliğinden çözer.</p>
+<table>
+<thead>
+<tr>
+<th>Eş</th>
+<th>Alt soy varsa</th>
+<th>Alt soy yoksa</th>
+</tr>
+</thead>
+<tbody><tr>
+<td>Koca</td>
+<td>1/4</td>
+<td>1/2</td>
+</tr>
+<tr>
+<td>Hanım(lar), toplam</td>
+<td>1/8</td>
+<td>1/4</td>
+</tr>
+</tbody></table>
+<p>Birden fazla hanım varsa toplam pay aralarında eşit bölünür.</p>
+<h2>Madde 5 — 2&#39;ye 1 Kuralı</h2>
+<p>Alt soyda ve kelâledeki öz/baba-bir kardeşlerde paylaşım, erkeğe iki kadına bir hisse
+esasıyla yapılır:</p>
+<p><strong>Toplam hisse = (erkek sayısı × 2) + (kadın sayısı × 1)</strong></p>
+<p><em>Örnek: 2 oğul + 1 kız = 5 hisse; her oğul 2/5, kız 1/5 alır.</em></p>
+<h3>Madde 5.1 — Temsil Yoluyla Mirasçılık</h3>
+<p>Ölenin vefat etmiş çocuğunun yeri, o çocuğun kendi çocukları (torunlar) tarafından
+doldurulur:</p>
+<p>a) Hisse hesabında vefat etmiş çocuk da sayılır (oğul 2, kız 1 hisse).
+b) Hayattaki çocuklar kendi paylarını doğrudan alır.
+c) Vefat etmiş çocuğun payı, <strong>yalnız kendi çocukları</strong> arasında 2:1 kuralıyla bölünür.</p>
+<p>Aynı ilke, kelâlede vefat etmiş kardeşlerin çocukları (yeğenler) için de uygulanır.</p>
+<h2>Madde 6 — Alt Soy Varken Taksim</h2>
+<p>a) <strong>Eş payı</strong> Madde 4&#39;e göre önce ayrılır (koca 1/4, hanımlar 1/8).
+b) <strong>Anne ve baba</strong>, hayatta olan her biri için kalanın 1/6&#39;sını alır. İkisi de hayatta
+   değilse pay ayrılmaz; kalan tamamen alt soya gider.
+c) <strong>Kalanın tamamı</strong> alt soy arasında Madde 5 (ve temsil için 5.1) kurallarıyla dağıtılır.
+d) Alt soy varken başka hiçbir sınıfa (asabe vb.) pay ayrılmaz. Anne-baba yokluğunda
+   kızlar kalanın tamamını alır (Nisâ 4/11 kapsamındaki yorum).</p>
+<h2>Madde 7 — Alt Soy Yok, Ebeveyn Hayatta</h2>
+<p>a) <strong>Eş payı</strong> önce ayrılır (koca 1/2, hanımlar 1/4).
+b) Ebeveyn payları, eş sonrası kalan üzerinden:</p>
+<p>   <strong>b.i — Anne ve baba birlikte hayattaysa:</strong> anne kalanın 1/3&#39;ünü, baba kalanın
+   tamamını alır.</p>
+<p>   <strong>b.ii — Yalnız baba hayattaysa:</strong> anne-bir kardeşler paylarını alır (tek kişi 1/6,
+   birden fazla toplam 1/3, eşit; temsil dahil); kalanın tamamı — öz kardeş payları
+   dahil — babaya verilir.</p>
+<p>   <strong>b.iii — Yalnız anne hayattaysa:</strong> kardeş varsa anne kalanın 1/6&#39;sını, yoksa
+   tamamını alır. Kardeş paylarında:</p>
+<ul>
+<li>Baba-bir kardeşler paylarını Madde 5 (2:1) kuralıyla alır (temsil dahil).</li>
+<li><strong>Öz kardeşlerin payları anneye aktarılır.</strong></li>
+<li>Yalnız anne-bir kardeş varsa: anne hayattayken anne-bir kardeşler mirasçı olmaz
+(Madde 8&#39;in şartı sağlanmaz); kalan anneye verilir (reddiye).</li>
+</ul>
+<p>c) <strong>Reddiye:</strong> paylar ayrıldıktan sonra hâlâ artan varsa anneye verilir; para ortada
+   bırakılmaz.</p>
+<h2>Madde 8 — Kelâle (Alt Soy ve Ebeveyn Yok)</h2>
+<p>a) <strong>Eş payı</strong> önce ayrılır (koca 1/2, hanımlar 1/4).</p>
+<p>b) <strong>Anne-bir kardeşler</strong> — payları eş sonrası kalan üzerinden hesaplanır:</p>
+<ul>
+<li>Tek kişi: 1/6 · Birden fazla: toplam 1/3, aralarında eşit.</li>
+<li>Vefat etmiş anne-bir kardeşin payı, çocuklarına (yeğenlere) 2:1 ile geçer (Madde 5.1).</li>
+<li><strong>Radd:</strong> Öz veya baba-bir kardeş yoksa, kalan da akrabalık sebebiyle anne-bir
+kardeşlere verilir. <em>(Kaynak: Prof. Abdurrahman Yazıcı, 2025)</em></li>
+</ul>
+<p>c) <strong>Öz ve baba-bir kardeşler</strong> — kalanın tamamını <strong>tek havuzda</strong>, Madde 5&#39;in 2:1
+   kuralıyla paylaşır; temsil (Madde 5.1) uygulanır.</p>
+<ul>
+<li>Öz kardeş, baba-bir kardeşi mirastan düşürmez (hacb uygulanmaz).</li>
+<li>Havuz yalnız kız kardeşlerden oluşuyorsa paylar Nisâ 4/176 ile uyumludur:
+tek kız kardeş 1/2 + reddiye, iki ve daha fazlası 2/3 eşit + reddiye — sonuç,
+kalanın tamamının eşit paylaşımıdır.</li>
+</ul>
+<h2>Madde 9 — Nihai Kontrol</h2>
+<p>Tüm hesaplar tamamlandığında <strong>dağıtılan toplam, net mirasa eşit olmak zorundadır</strong>;
+kalan tutar sıfırdır. Motor bu değişmezi her hesapta doğrular ve sonuç tablosunda
+mirasçı, pay oranı, dayanak ve tutar şeffaf biçimde gösterilir.</p>
+<h3>Madde 9.1 — Mirasçısı Olmayan Kalan (Amme Malı)</h3>
+<p>Paylar ayrıldıktan sonra kalan için hiçbir mirasçı yoksa (örneğin yalnız eş hayattaysa
+veya hiç mirasçı bulunmuyorsa), kalan <strong>amme malı</strong> olur; devlete / ilgili otoriteye
+kalır. Sonuç tablosunda &quot;Devlet / ilgili otorite&quot; satırı ve açıklayıcı notla gösterilir;
+hata olarak sunulmaz. <em>(Kaynak: Süleymaniye Vakfı, 2026)</em></p>
+<h2>Madde 10 — Kapsam</h2>
+<p>Bu çalışma şu mirasçı sınıflarını kapsar:</p>
+<ul>
+<li><strong>Eş</strong> (koca / hanımlar)</li>
+<li><strong>Alt soy:</strong> çocuklar ve temsil yoluyla torunlar</li>
+<li><strong>Üst soy:</strong> anne ve baba</li>
+<li><strong>Kardeşler:</strong> öz, baba-bir ve anne-bir kardeşler; temsil yoluyla yeğenler</li>
+</ul>
+<p>Dede/nine, amca/hala/dayı/teyze ve diğer uzak akrabaların payları bu çalışmanın kapsamı
+dışındadır ve hesaplayıcıda yer almaz. Vasiyet uygulaması da kapsam dışıdır; net miras
+yalnız Madde 2&#39;deki kalemler düşülerek bulunur.</p>
+<hr>
+<h2>Uygulama İlkeleri</h2>
+<ol>
+<li><strong>Tutarlılık:</strong> Tüm hesaplar bu belgeye göre yapılır; motor ve belge birlikte değişir.</li>
+<li><strong>Kaynak uyumu:</strong> Süleymaniye Vakfı meali ve açıklamaları esas alınır.</li>
+<li><strong>Adalet:</strong> Para asla ortada kalmaz; tam dağıtım yapılır (Madde 9).</li>
+<li><strong>Şeffaflık:</strong> Her hesap adımı, madde referanslarıyla kullanıcıya açıklanır.</li>
+</ol>
+<h2>Sürüm Geçmişi</h2>
+<ul>
+<li><strong>3.0 (14 Tem 2026):</strong> Belge &quot;Hesaplama Kuralları&quot; adıyla ve sade yapıyla yeniden düzenlendi; içerik hükümleri değişmedi.</li>
+<li><strong>2.7 (13 Tem 2026):</strong> Vasiyet kaldırıldı; temsil satırı geçerlilik kuralı; Madde 9.1 (amme malı); Madde 7b.iii, 8b (radd ve taban) ve 8c (tek havuz) netleştirmeleri onaylandı.</li>
+<li><strong>2.6 (16 Tem 2025):</strong> Temsil yoluyla mirasçılık.</li>
+<li><strong>2.1 ve öncesi:</strong> Alt soy kuralının netleştirilmesi (anne-baba yokluğunda kızlar kalan tamamını alır) ve temel maddeler.</li>
+</ul>
+
+  </div>
+</body>
+</html>

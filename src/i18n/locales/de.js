@@ -110,8 +110,8 @@ export default {
       "Hinweis: Dieses Dokument wurde vom Rechner auf feraiz.com nur zu Informationszwecken erstellt; es stellt keine rechtliche oder religiöse Beratung dar. Wenden Sie sich für endgültige Entscheidungen an zuständige Stellen und Fachleute.",
 
     stepsTitle: "Wie wurde gerechnet? (Schritt für Schritt)",
-    rulesLink: "Berechnungsregeln (Verfassung)",
-    rulesNote: "Alle Artikelverweise beziehen sich auf die Berechnungsverfassung (türkisches Original):",
+    rulesLink: "Berechnungsregeln",
+    rulesNote: "Alle Artikelverweise beziehen sich auf das Regelwerk (türkisches Original):",
 
     footerRights: "Feraiz.com | Alle Rechte vorbehalten.",
     footerContact: "Kontakt",
@@ -123,7 +123,7 @@ export default {
 
     aboutTitle: "Über",
     aboutP1:
-      "Feraiz.com ist ein zu Bildungs- und Forschungszwecken erstelltes Berechnungstool auf Grundlage der Erbregelungen in Sure An-Nisa und verwandten Versen des Korans. Die Berechnungslogik folgt Schritt für Schritt den veröffentlichten \"Verfassungs\"-Regeln (Ehegattenanteil zuerst, Elternanteile, Nachkommen und Vertretung 2:1, Geschwistervertretung usw.); die Ergebnisse werden in einer transparenten Tabelle angezeigt.",
+      "Feraiz.com ist ein zu Bildungs- und Forschungszwecken erstelltes Berechnungstool auf Grundlage der Erbregelungen in Sure An-Nisa und verwandten Versen des Korans. Die Berechnungslogik folgt Schritt für Schritt den veröffentlichten Berechnungsregeln (Ehegattenanteil zuerst, Elternanteile, Nachkommen und Vertretung 2:1, Geschwistervertretung usw.); die Ergebnisse werden in einer transparenten Tabelle angezeigt.",
     aboutB1: "Grundlage: An-Nisa 4/11, 4/12, 4/176 und verwandte Verse; Übersetzung der Süleymaniye-Stiftung.",
     aboutB2: "Reihenfolge: Netto nach Bestattung/Schulden → Ehepartner → Eltern → Nachkommen/Vertretung → (bei Bedarf) Geschwister/Vertretung.",
     aboutB3: "Rundung: Beträge werden auf Cent gerundet; die Summe entspricht stets dem Nettonachlass.",

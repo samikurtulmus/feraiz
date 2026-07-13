@@ -1,9 +1,9 @@
-// anayasa.md → public/anayasa.html
-// anayasa.md her değiştiğinde çalıştırın: npm run anayasa
+// KURALLAR.md → public/kurallar.html
+// KURALLAR.md her değiştiğinde çalıştırın: npm run kurallar
 import { readFileSync, writeFileSync } from "node:fs";
 import { marked } from "marked";
 
-const md = readFileSync(new URL("../anayasa.md", import.meta.url), "utf-8");
+const md = readFileSync(new URL("../KURALLAR.md", import.meta.url), "utf-8");
 const body = marked.parse(md);
 
 const html = `<!doctype html>
@@ -11,15 +11,15 @@ const html = `<!doctype html>
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Hesaplama Anayasası | Feraiz.com</title>
+  <title>Hesaplama Kuralları | Feraiz.com</title>
   <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-  <meta name="description" content="Feraiz.com miras hesaplama motorunun dayandığı kuralların tam metni (anayasa)." />
-  <link rel="canonical" href="https://feraiz.com/anayasa.html" />
-  <meta property="og:title" content="Hesaplama Anayasası | Feraiz.com" />
+  <meta name="description" content="Feraiz.com miras hesaplama motorunun dayandığı kuralların tam metni" />
+  <link rel="canonical" href="https://feraiz.com/kurallar.html" />
+  <meta property="og:title" content="Hesaplama Kuralları | Feraiz.com" />
   <meta property="og:description" content="Feraiz.com hesaplama kurallarının tam metni." />
   <meta property="og:type" content="article" />
   <meta property="og:locale" content="tr_TR" />
-  <meta property="og:url" content="https://feraiz.com/anayasa.html" />
+  <meta property="og:url" content="https://feraiz.com/kurallar.html" />
   <style>
     :root{color-scheme: light dark}
     body{font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial; margin:0; color:#0f172a; background:#F8F5EC}
@@ -65,5 +65,5 @@ const html = `<!doctype html>
 </html>
 `;
 
-writeFileSync(new URL("../public/anayasa.html", import.meta.url), html, "utf-8");
-console.log("public/anayasa.html üretildi");
+writeFileSync(new URL("../public/kurallar.html", import.meta.url), html, "utf-8");
+console.log("public/kurallar.html üretildi");

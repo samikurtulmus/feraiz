@@ -9,7 +9,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "anayasa": "node scripts/build-anayasa.mjs"
+    "kurallar": "node scripts/build-kurallar.mjs"
   },
   "license": "AGPL-3.0-or-later",
   "dependencies": {

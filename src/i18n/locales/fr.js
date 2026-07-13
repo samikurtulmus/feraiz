@@ -110,8 +110,8 @@ export default {
       "Avertissement : ce document a été généré par le calculateur feraiz.com à titre informatif uniquement ; il ne constitue pas un conseil juridique ou religieux. Consultez les autorités compétentes et des experts pour vos décisions finales.",
 
     stepsTitle: "Comment le calcul a-t-il été fait ? (pas à pas)",
-    rulesLink: "Règles de calcul (Constitution)",
-    rulesNote: "Toutes les références d'articles renvoient à la constitution de calcul (original en turc) :",
+    rulesLink: "Règles de calcul",
+    rulesNote: "Toutes les références d'articles renvoient au document des règles de calcul (original en turc) :",
 
     footerRights: "Feraiz.com | Tous droits réservés.",
     footerContact: "Contact",
@@ -123,7 +123,7 @@ export default {
 
     aboutTitle: "À propos",
     aboutP1:
-      "Feraiz.com est un outil de calcul conçu à des fins pédagogiques et de recherche, fondé sur les dispositions successorales de la sourate An-Nisa et des versets connexes du Coran. La logique de calcul applique pas à pas les règles de la « constitution » publiée (part du conjoint d'abord, parts des parents, descendants et représentation à 2:1, représentation des frères et sœurs, etc.) et les résultats sont présentés dans un tableau transparent.",
+      "Feraiz.com est un outil de calcul conçu à des fins pédagogiques et de recherche, fondé sur les dispositions successorales de la sourate An-Nisa et des versets connexes du Coran. La logique de calcul applique pas à pas les règles de calcul publiées (part du conjoint d'abord, parts des parents, descendants et représentation à 2:1, représentation des frères et sœurs, etc.) et les résultats sont présentés dans un tableau transparent.",
     aboutB1: "Fondement : An-Nisa 4/11, 4/12, 4/176 et versets connexes ; traduction de la Fondation Süleymaniye.",
     aboutB2: "Ordre : net après funérailles/dettes → conjoint → parents → descendants/représentation → (si besoin) frères et sœurs/représentation.",
     aboutB3: "Arrondi : les montants sont arrondis au centime ; le total est toujours égal à la succession nette.",

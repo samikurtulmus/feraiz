@@ -1,4 +1,4 @@
-// Hesap motoru v5 — anayasa.md (v2.7) ile uyumlu, çok dilli
+// Hesap motoru v5 — KURALLAR.md (v3.0) ile uyumlu, çok dilli
 // Girdi: sayısal alanlar number; bayraklar boolean; opsiyonel temsili hat listeleri
 // - deceasedChildren: Array<{sex:'male'|'female', grandsons:number, granddaughters:number}>
 // - deceasedFullSiblings / deceasedHalfPatSiblings: Array<{sex:'male'|'female', sons:number, daughters:number}>

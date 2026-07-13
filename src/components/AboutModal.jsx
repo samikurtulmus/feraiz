@@ -24,7 +24,7 @@ export default function AboutModal({ open, onClose }) {
 
           <p>
             {t.aboutRules}{" "}
-            <a className="underline" href={import.meta.env.BASE_URL + "anayasa.html"} target="_blank" rel="noopener">
+            <a className="underline" href={import.meta.env.BASE_URL + "kurallar.html"} target="_blank" rel="noopener">
               {t.rulesLink}
             </a>
           </p>
