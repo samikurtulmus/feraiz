@@ -175,7 +175,7 @@ export function computeDistribution(raw) {
         remainder = 0;
       }
       // Anne var, baba yok: paternel taraf kardeşleri (baba-bir + öz) devreye girer;
-      // öz kardeş payları anneye aktarılır (kullanıcı netleştirmesi — teyit bekliyor).
+      // öz kardeş payları anneye aktarılır (Madde 7b.iii — onaylı kural).
       if (remainder > 0) {
         const weightFull =
           2 * fullB + fullS + f.deceasedFullSiblings.reduce((a, s) => a + (s.sex === "male" ? 2 : 1), 0);

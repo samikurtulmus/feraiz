@@ -179,7 +179,7 @@ describe("MADDE 7 — Çocuksuz, ebeveyn hayatta (Senaryo B)", () => {
     checkInvariant(r);
   });
 
-  it("kullanıcı kuralı (teyit bekliyor): eş + anne + 2 öz erkek kardeş, baba yok → öz kardeş payı anneye", () => {
+  it("onaylı kural (M7b.iii): eş + anne + 2 öz erkek kardeş, baba yok → öz kardeş payı anneye", () => {
     const r = calc({ wivesCount: 1, motherExists: true, fullBrothers: 2 });
     expect(amountOf(r, "Eş #1")).toBeCloseTo(NET / 4, 4);
     // Anne: 1/6 × 3/4 (kardeş var) + öz kardeş paylarının aktarımı = kalan tamamı
@@ -226,7 +226,7 @@ describe("MADDE 8B — Baba-bir kardeş kelâlesi (Nisâ 4/176)", () => {
 });
 
 describe("MADDE 8C — Tam kelâle", () => {
-  it("öz E + öz K + baba-bir E tek havuzda 2:1 → 2/5, 1/5, 2/5 (mevcut yorum pinlendi)", () => {
+  it("öz E + öz K + baba-bir E tek havuzda 2:1 → 2/5, 1/5, 2/5 (M8C netleştirmesi — hacb yok, onaylandı)", () => {
     const r = calc({ fullBrothers: 1, fullSisters: 1, halfPatBrothers: 1 });
     expect(amountOf(r, "Öz erkek kardeş")).toBeCloseTo((NET * 2) / 5, 4);
     expect(amountOf(r, "Öz kız kardeş")).toBeCloseTo(NET / 5, 4);

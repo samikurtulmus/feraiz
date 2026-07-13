@@ -177,6 +177,12 @@ Eş payı ve (varsa) anne-baba payları düşüldükten sonra geriye ne kaldıys
 **b.ii) Babanın Payı:**
 - Anneden sonra **kalan miktarın tamamı** babaya verilir
 
+**b.iii) Baba Vefat Etmiş, Anne Hayatta İken Kardeş Payları (v2.7 — onaylandı):**
+- Baba-bir kardeşler paylarını **Madde 5'teki 2'ye 1 kuralına** göre alır
+- **Öz kardeşlerin payları anneye aktarılır**
+- Yalnız anne-bir kardeş varsa: anne hayattayken anne-bir kardeşler mirasçı olmaz
+  (Madde 8A şartı), kalan **anneye** verilir (reddiye)
+
 ### 🔄 c) Reddiye Hali (Özel Durum):
 **Şartlar:**
 - Baba hayatta değil
@@ -199,7 +205,7 @@ Eş payı ve (varsa) anne-baba payları düşüldükten sonra geriye ne kaldıys
 
 
 ### 👫 b) Anne-bir Kardeşlerin Payı:
-**Doğrudan NET MİRAS üzerinden** hesaplanır:
+**EŞ PAYI ÇIKTIKTAN SONRA KALAN MİRAS üzerinden** hesaplanır (Madde 4 önceliği ile uyumlu — v2.7'de netleştirildi ve onaylandı):
 - **Tek kişi ise:** 1/6 pay
 - **Birden fazla ise:** Toplamda 1/3 pay ➜ Aralarında **eşit paylaşım**
 
@@ -211,7 +217,9 @@ Eş payı ve (varsa) anne-baba payları düşüldükten sonra geriye ne kaldıys
 Kalan Miktar = Net Miras - (Eşin Payı + Anne-bir Kr. Payı)
 ```
 
-Bu kalan miktarın **tamamı**, öz/baba-bir kardeşler arasında **Madde 5'teki 2'ye 1 kuralına** göre paylaştırılır.
+Bu kalan miktarın **tamamı**, öz/baba-bir kardeşler arasında **TEK HAVUZDA** ve **Madde 5'teki 2'ye 1 kuralına** göre paylaştırılır.
+
+> **Netleştirme (v2.7 — onaylandı):** Öz kardeş, baba-bir kardeşi mirastan düşürmez (hacb uygulanmaz); ikisi aynı havuzda cinsiyete göre 2:1 hisse alır.
 
 ---
 
