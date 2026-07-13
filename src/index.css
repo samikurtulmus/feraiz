@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css2?family=Amiri:wght@400;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Global */
+html, body, #root {
+  height: 100%;
+}
+
+/* Prevent accidental horizontal scrolling on mobile */
+html, body {
+  overflow-x: hidden;
+}
+
+/* Yazdırma: sadece #print-area görünsün */
+@media print {
+  body * { visibility: hidden !important; }
+  #print-area, #print-area * {
+    visibility: visible !important;
+  }
+  #print-area {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    padding: 0 12mm;
+    background: white;
+    color: black;
+  }
+  /* linkler altı çizgili siyah olsun */
+  a { color: black !important; text-decoration: underline !important; }
+}
+
+/* Kaydırma çubuğu (opsiyonel) */
+* { scrollbar-width: thin; scrollbar-color: #cbd5e1 transparent; }
+*::-webkit-scrollbar { height: 10px; width: 10px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { 
+    background-color: #cbd5e1; 
+    border-radius: 8px; 
+    border: 2px solid transparent; 
+    background-clip: padding-box; 
+}
+
+/* Allow horizontal pan on inner scrollers (mobile) */
+.touch-pan-x {
+  touch-action: pan-x;
+}
+
+.font-arabic {
+    font-family: 'Noto Naskh Arabic', serif;
+    line-height: 2;
+}
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  .no-print { display: none !important; }
+  .print-area { page-break-inside: avoid; }
+}

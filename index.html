@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="tr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="format-detection" content="telephone=no" />
+    <meta name="theme-color" content="#2E5077" />
+    <title>Feraiz.com | Ayet Bazlı Miras Hesaplayıcı</title>
+
+    <!-- Favicon (adalet terazisi) -->
+    <link rel="icon" type="image/svg+xml" href="./favicon.svg" />
+
+    <!-- Google Fonts: Arabic (Noto Naskh) -->
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet" />
+
+    <!-- Font Awesome (ikonlar için) — integrity/crossorigin kullanılmıyor -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+
+    <!-- AdSense (client ID'yi değiştirin) -->
+    <link rel="preconnect" href="https://pagead2.googlesyndication.com" crossorigin>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1688340004546677" crossorigin="anonymous"></script>
+
+    <!-- Sayfa açıklaması -->
+    <meta
+      name="description"
+      content="Feraiz: Kur'an'da belirlenmiş miras payları ve Allah'ın koyduğu adil sınırlar - ayet ve meallere dayalı miras hesaplayıcı."
+    />
+
+    <!-- Canonical + Open Graph + Twitter -->
+    <link rel="canonical" href="https://feraiz.com/" />
+    <meta property="og:locale" content="tr_TR" />
+    <meta property="og:type" content="website" />
+    <meta property="og:title" content="Feraiz.com — Ayet Bazlı Miras Hesaplayıcı" />
+    <meta property="og:description" content="Kur'an'da belirlenmiş miras paylarına dayalı hesaplayıcı." />
+    <meta property="og:url" content="https://feraiz.com/" />
+    <meta property="og:site_name" content="Feraiz.com" />
+    <meta property="og:image" content="/og-image.svg" />
+    <meta name="twitter:card" content="summary" />
+
+    <!-- Structured Data -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "Feraiz.com",
+      "url": "https://feraiz.com/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://feraiz.com/?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+  </head>
+  <body class="bg-light text-primary">
+    <div id="root"></div>
+
+    <!-- Vite giriş noktası -->
+    <script type="module" src="./src/main.jsx"></script>
+  </body>
+</html>

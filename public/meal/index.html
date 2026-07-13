@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+  <meta name="theme-color" content="#1a1a1a"/>
+  <title>Ayet Panosu | Feraiz.com</title>
+  <meta name="description" content="Her 30 saniyede yenilenen Ayet Panosu: renkli harekeli Arapça metin, Türkçe meâl ve sûre/ayet bilgisi."/>
+  <meta name="robots" content="index,follow"/>
+
+  <!-- Icons specific to meal -->
+  <link rel="apple-touch-icon" sizes="180x180" href="./apple-touch-icon.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./favicon-32x32.png" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./favicon-16x16.png" />
+  <link rel="icon" href="./favicon.ico" />
+  <link rel="manifest" href="./site.webmanifest" />
+
+  <!-- Open Graph -->
+  <meta property="og:title" content="Ayet Panosu | Feraiz.com"/>
+  <meta property="og:description" content="Renkli harekeli Arapça metin, Türkçe meâl ve sûre/ayet bilgisi."/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:site_name" content="Feraiz.com"/>
+  <meta property="og:locale" content="tr_TR"/>
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary"/>
+  <meta name="twitter:title" content="Ayet Panosu | Feraiz.com"/>
+  <meta name="twitter:description" content="Renkli harekeli Arapça metin, Türkçe meâl ve sûre/ayet bilgisi."/>
+
+  <!-- Fonts & Icons -->
+  <link rel="preconnect" href="https://fonts.googleapis.com"/>
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+  <link href="https://fonts.googleapis.com/css2?family=Merriweather:wght@400;700&family=Amiri+Quran&family=Noto+Naskh+Arabic:wght@400;700&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer"/>
+
+  <style>
+    @font-face{ font-family:'Amiri Quran Colored'; src: local('Amiri Quran Colored'), local('AmiriQuranColored'), url('https://raw.githubusercontent.com/aliftype/amiri/master/fonts/AmiriQuranColored.ttf') format('truetype'); font-display:swap; }
+    :root{ --bg-color:#1a1a1a; --text-color:#e8e8e8; --arabic-color:#ffd166; --haraka-color:#ff4d4d; --info-color:#a0a0a0; --footer-color:#888; --footer-subtitle-color:#666; --transition-speed:1.5s; }
+    *{box-sizing:border-box}
+    body{ margin:0; min-height:100dvh; background:var(--bg-color); color:var(--text-color); font-family:'Merriweather',serif; padding:4vh 0; }
+    .container{width:90%;max-width:1400px;margin:0 auto;text-align:center}
+    .verse-box{opacity:0;transition:opacity var(--transition-speed) ease-in-out;padding:1.6em .8em}
+    .verse-box.fade-in{opacity:1}
+    #arabic-text{ font-family:'Amiri Quran Colored','Amiri Quran','Noto Naskh Arabic',serif; color:var(--arabic-color); line-height:1.95; margin-bottom:1.5em; font-size:clamp(1.8rem,1rem + 3.5vw,4rem); }
+    #meal-text{ line-height:1.6; margin-bottom:1em; font-size:clamp(1.2rem,.8rem + 1.5vw,2.5rem) }
+    #surah-info{ color:var(--info-color); font-family:'Amiri Quran',serif; font-size:clamp(1rem,.8rem + .5vw,1.4rem) }
+    .page-footer{ position:fixed;left:0;right:0;bottom:0;padding:15px; display:flex;justify-content:space-between;align-items:center; font-size:clamp(.75rem,.6rem + .5vw,.9rem);color:var(--footer-color); background:linear-gradient(to top,rgba(0,0,0,.5),transparent); }
+    .clock{font-family:monospace}
+    .site-info{text-align:right}
+    .site-info .logo{display:flex;align-items:center;justify-content:flex-end;gap:8px;font-weight:bold}
+    .logo-link{text-decoration:none;color:inherit;transition:opacity .3s ease}
+    .logo-link:hover{opacity:.85}
+    .site-info .subtitle{font-size:.8em;margin:2px 0 0 0;color:var(--footer-subtitle-color)}
+    .logo-link:hover .site-name{text-decoration:underline}
+    @media (max-width:900px){ .container{max-width:98vw;padding:0 2vw} #arabic-text{font-size:clamp(1.3rem,1rem + 2vw,2.2rem)} #meal-text{font-size:clamp(1rem,.8rem + 1vw,1.5rem)} #surah-info{font-size:clamp(.9rem,.7rem + .5vw,1.1rem)} .verse-box{padding:1.2em .5em} }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section id="verse-box" class="verse-box">
+      <div id="arabic-text"></div>
+      <div id="meal-text"></div>
+      <div id="surah-info"></div>
+    </section>
+  </main>
+
+  <footer class="page-footer">
+    <div class="clock" id="clock">00:00:00</div>
+    <div class="site-info">
+      <a href="../" class="logo-link">
+        <div class="logo">
+          <i class="fas fa-balance-scale"></i>
+          <p class="site-name">Feraiz.com</p>
+        </div>
+      </a>
+      <p class="subtitle">Kur'an'da belirlenmiş miras payları</p>
+    </div>
+  </footer>
+
+  <script>
+    const ALL_VERSES_FILE   = './tum_ayetlerwitharabic.json';
+    const SECONDS_PER_VERSE = 30;
+    const arabicTextElement = document.getElementById('arabic-text');
+    const mealTextElement   = document.getElementById('meal-text');
+    const surahInfoElement  = document.getElementById('surah-info');
+    const verseBoxElement   = document.getElementById('verse-box');
+    const clockElement      = document.getElementById('clock');
+    let allVerses = [];
+    let lastDisplayedVerseId = null;
+    let nextChangeTimer = null;
+    let HARAQAT_REGEX;
+    try{ HARAQAT_REGEX = /[\p{M}\u06D6-\u06ED]/gu; }catch(_){ HARAQAT_REGEX = /[\u0617-\u061A\u064B-\u065F\u0670\u06D6-\u06ED]/g; }
+    function colorizeHarakat(str){ return str; }
+    function updateClock(){ const now = new Date(); const utc = now.getTime() + (now.getTimezoneOffset() * 60000); const turkeyTime = new Date(utc + (3600000 * 3)); const hh = String(turkeyTime.getHours()).padStart(2,'0'); const mm = String(turkeyTime.getMinutes()).padStart(2,'0'); const ss = String(turkeyTime.getSeconds()).padStart(2,'0'); clockElement.textContent = `${hh}:${mm}:${ss}`; }
+    function renderCurrentVerse(){ if(!allVerses.length) return; const nowSec = Math.floor(Date.now() / 1000); const total  = allVerses.length; const totalCycleSeconds = total * SECONDS_PER_VERSE; const secondsIntoCycle = nowSec % totalCycleSeconds; const currentIndex = Math.floor(secondsIntoCycle / SECONDS_PER_VERSE); const verse = allVerses[currentIndex]; const currentVerseId = `${verse.sure_adi}-${verse.ayet_numarasi}`; if(lastDisplayedVerseId !== currentVerseId){ lastDisplayedVerseId = currentVerseId; verseBoxElement.classList.remove('fade-in'); void verseBoxElement.offsetWidth; arabicTextElement.textContent = colorizeHarakat(verse.arapca_metin || ''); mealTextElement.textContent = verse.meal || ''; surahInfoElement.textContent = `${verse.sure_adi} Suresi, ${verse.ayet_numarasi}. Ayet`; verseBoxElement.classList.add('fade-in'); } const nowMs = Date.now(); const msIntoStep = (nowMs % (SECONDS_PER_VERSE * 1000)); const msToNext = (SECONDS_PER_VERSE * 1000) - msIntoStep + 10; clearTimeout(nextChangeTimer); nextChangeTimer = setTimeout(renderCurrentVerse, msToNext); }
+    async function init(){ try{ const res = await fetch(ALL_VERSES_FILE, {cache:'no-store'}); if(!res.ok) throw new Error('Ayet dosyası yüklenemedi.'); allVerses = await res.json(); }catch(err){ console.error(err); allVerses = [{ sure_adi:'Fâtiha', ayet_numarasi:1, arapca_metin:'\uFE91\uFEE4\uFE92\u0651\u0645 \u0627\u0644\u0644\u0647 \u0627\u0644\u0631\u0651\u062D\u0645\u0670\u0646 \u0627\u0644\u0631\u0651\u062D\u0650\u064A\u0645', meal:'Rahmân ve Rahîm olan Allah’ın adıyla.' }]; mealTextElement.textContent = 'Ayetler yüklenirken bir sorun oluştu. Yedek ayet gösteriliyor.'; } renderCurrentVerse(); updateClock(); setInterval(updateClock, 1000); }
+    init();
+  </script>
+</body>
+</html>
