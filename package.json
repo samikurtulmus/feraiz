@@ -8,8 +8,10 @@
     "build": "vite build",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "anayasa": "node scripts/build-anayasa.mjs"
   },
+  "license": "AGPL-3.0-or-later",
   "dependencies": {
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
@@ -19,6 +21,7 @@
     "@types/react-dom": "^18.2.0",
     "@vitejs/plugin-react": "^4.3.1",
     "autoprefixer": "^10.4.20",
+    "marked": "^18.0.6",
     "postcss": "^8.4.41",
     "tailwindcss": "^3.4.10",
     "vite": "^7.1.5",

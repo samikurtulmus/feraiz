@@ -5,10 +5,10 @@ export default {
   theme: {
     extend: {
       colors: {
-        primary: "#2E5077",   // koyu mavi
-        secondary: "#4DA1A9", // turkuaz
-        accent: "#79D7BE",    // açık yeşil
-        light: "#F6F4F0",     // krem
+        primary: "#1F4D3F",   // koyu zümrüt
+        secondary: "#2E7D64", // zümrüt
+        accent: "#D9A441",    // altın
+        light: "#F8F5EC",     // sıcak krem
         paper: "#ffffff",
         ink: "#0f172a"
       },

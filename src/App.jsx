@@ -10,11 +10,13 @@ import GoogleAd from "./components/GoogleAd.jsx";
 import { computeDistribution } from "./lib/feraiz.js";
 import { encodeState, decodeState, defaultState } from "./lib/urlState.js";
 import { listScenarios, saveScenario, loadScenario, deleteScenario } from "./lib/scenarios.js";
+import { locales, detectLang, persistLang, applySeo, LocaleProvider } from "./i18n/index.js";
 
 const toN = (digits) => Number(digits || "0");
 
 // Paylaşım linkiyle gelindiyse form URL'deki durumla açılır
 const initialForm = typeof window !== "undefined" ? decodeState(window.location.search) : defaultState();
+const initialLang = detectLang();
 
 const THEME_KEY = "feraiz.theme";
 const initialTheme =
@@ -43,6 +45,18 @@ export default function App() {
       return { ...f, [field]: arr };
     });
 
+  // --- Dil ---
+  const [lang, setLangState] = useState(initialLang);
+  const L = locales[lang];
+  const t = L.ui;
+  const setLang = (code) => {
+    setLangState(code);
+    persistLang(code);
+  };
+  useEffect(() => {
+    applySeo(L);
+  }, [L]);
+
   // --- Tema ---
   const [theme, setTheme] = useState(initialTheme);
   useEffect(() => {
@@ -61,42 +75,45 @@ export default function App() {
   const [selectedScenario, setSelectedScenario] = useState("");
 
   // --- Hesap (ucuz olduğu için her render'da; memo gerekmiyor) ---
-  const result = computeDistribution({
-    gross: toN(form.gross),
-    funeral: toN(form.funeral),
-    debts: toN(form.debts),
-    decedentSex: form.decedentSex,
-    husbandExists: form.husbandExists,
-    wivesCount: toN(form.wivesCount),
-    sons: toN(form.sons),
-    daughters: toN(form.daughters),
-    motherExists: form.motherExists,
-    fatherExists: form.fatherExists,
-    maternalSiblings: toN(form.maternalSiblings),
-    fullBrothers: toN(form.fullBrothers),
-    fullSisters: toN(form.fullSisters),
-    halfPatBrothers: toN(form.halfPatBrothers),
-    halfPatSisters: toN(form.halfPatSisters),
-    deceasedChildren: form.deceasedChildren.map((it) => ({
-      sex: it.sex, grandsons: toN(it.grandsons), granddaughters: toN(it.granddaughters),
-    })),
-    deceasedFullSiblings: form.deceasedFullSiblings.map((it) => ({
-      sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
-    })),
-    deceasedHalfPatSiblings: form.deceasedHalfPatSiblings.map((it) => ({
-      sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
-    })),
-    deceasedMaternalSiblings: form.deceasedMaternalSiblings.map((it) => ({
-      sons: toN(it.sons), daughters: toN(it.daughters),
-    })),
-  });
+  const result = computeDistribution(
+    {
+      gross: toN(form.gross),
+      funeral: toN(form.funeral),
+      debts: toN(form.debts),
+      decedentSex: form.decedentSex,
+      husbandExists: form.husbandExists,
+      wivesCount: toN(form.wivesCount),
+      sons: toN(form.sons),
+      daughters: toN(form.daughters),
+      motherExists: form.motherExists,
+      fatherExists: form.fatherExists,
+      maternalSiblings: toN(form.maternalSiblings),
+      fullBrothers: toN(form.fullBrothers),
+      fullSisters: toN(form.fullSisters),
+      halfPatBrothers: toN(form.halfPatBrothers),
+      halfPatSisters: toN(form.halfPatSisters),
+      deceasedChildren: form.deceasedChildren.map((it) => ({
+        sex: it.sex, grandsons: toN(it.grandsons), granddaughters: toN(it.granddaughters),
+      })),
+      deceasedFullSiblings: form.deceasedFullSiblings.map((it) => ({
+        sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
+      })),
+      deceasedHalfPatSiblings: form.deceasedHalfPatSiblings.map((it) => ({
+        sex: it.sex, sons: toN(it.sons), daughters: toN(it.daughters),
+      })),
+      deceasedMaternalSiblings: form.deceasedMaternalSiblings.map((it) => ({
+        sons: toN(it.sons), daughters: toN(it.daughters),
+      })),
+    },
+    L.engine
+  );
 
   // --- Girdi doğrulama uyarıları (motoru etkilemez, bilgilendirir) ---
   const inputWarnings = [];
   if (toN(form.debts) + toN(form.funeral) > toN(form.gross) && toN(form.gross) > 0)
-    inputWarnings.push("Defin gideri ve borçların toplamı brüt terekeyi aşıyor.");
+    inputWarnings.push(t.warnDebtsExceed);
   if (form.decedentSex === "male" && toN(form.wivesCount) > 4)
-    inputWarnings.push("Eş sayısı 4'ten fazla girildi; lütfen kontrol edin.");
+    inputWarnings.push(t.warnWives4);
 
   const clearForm = () => {
     setForm(defaultState());
@@ -105,19 +122,19 @@ export default function App() {
   };
 
   const shareLink = async () => {
-    const qs = encodeState(form);
+    const qs = encodeState(form) + (lang !== "tr" ? `&lang=${lang}` : "");
     const url = `${window.location.origin}${window.location.pathname}?${qs}`;
     window.history.replaceState(null, "", `?${qs}`);
     try {
       if (navigator.share) {
-        await navigator.share({ title: "Feraiz.com hesap sonucu", url });
-        setShareMsg("Paylaşıldı");
+        await navigator.share({ title: L.seo.title, url });
+        setShareMsg(t.shared);
       } else {
         await navigator.clipboard.writeText(url);
-        setShareMsg("Link kopyalandı");
+        setShareMsg(t.copied);
       }
     } catch {
-      setShareMsg("Link adres çubuğunda hazır");
+      setShareMsg(t.inAddressBar);
     }
     setTimeout(() => setShareMsg(""), 3000);
   };
@@ -142,6 +159,9 @@ export default function App() {
     setSelectedScenario("");
   };
 
+  const fmtMoney = (n) =>
+    Number(n).toLocaleString(L.numberLocale, { maximumFractionDigits: 2 }) + L.moneySuffix;
+
   const inputCls = "dark:bg-slate-800 dark:border-slate-600 dark:text-slate-100";
   const sectionCls =
     "bg-paper rounded-2xl p-5 shadow-soft border border-subtle dark:bg-slate-800/60 dark:border-slate-700";
@@ -158,7 +178,7 @@ export default function App() {
       <div className="flex items-center justify-between mb-2">
         <h4 className="font-medium text-primary dark:text-slate-200">{title}</h4>
         <button type="button" className="px-2 py-1 rounded-lg bg-secondary text-white text-sm" onClick={addRow(field, emptyRow)}>
-          Satır ekle
+          {t.addRow}
         </button>
       </div>
       {form[field].length === 0 && <p className="text-sm text-primary/70 dark:text-slate-400">{emptyHint}</p>}
@@ -167,7 +187,7 @@ export default function App() {
           <div key={idx} className={`grid ${sexOptions ? "grid-cols-2 sm:grid-cols-4" : "grid-cols-3"} gap-2 items-end`}>
             {sexOptions && (
               <div>
-                <label className={labelCls}>Cinsiyet</label>
+                <label className={labelCls}>{t.sex}</label>
                 <select
                   value={row.sex}
                   onChange={(e) => setRow(field, idx, { sex: e.target.value })}
@@ -188,7 +208,7 @@ export default function App() {
             </div>
             <div className="flex justify-end">
               <button type="button" className="px-2 py-2 rounded-lg bg-red-500 text-white text-sm" onClick={() => delRow(field, idx)}>
-                Sil
+                {t.delete}
               </button>
             </div>
           </div>
@@ -198,8 +218,13 @@ export default function App() {
   );
 
   return (
+    <LocaleProvider value={{ L, t, lang, setLang }}>
     <div className="min-h-[100vh] min-h-[100dvh] bg-light text-ink dark:bg-slate-900 dark:text-slate-100">
-      <Header onOpenAbout={() => setAboutOpen(true)} theme={theme} onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")} />
+      <Header
+        onOpenAbout={() => setAboutOpen(true)}
+        theme={theme}
+        onToggleTheme={() => setTheme(theme === "dark" ? "light" : "dark")}
+      />
 
       {/* Side rail ads (desktop) — içerik oluşmadan gösterme (policy) */}
       {result.rows.length > 0 && (
@@ -217,17 +242,17 @@ export default function App() {
         {/* Girdiler */}
         <section className={sectionCls}>
           <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-            <h2 className="text-lg font-semibold text-primary dark:text-slate-100">Girdiler</h2>
+            <h2 className="text-lg font-semibold text-primary dark:text-slate-100">{t.inputs}</h2>
             {/* Senaryo kaydet/yükle */}
             <div className="no-print flex items-center gap-1.5 text-sm flex-wrap">
               <input
                 value={scenarioName}
                 onChange={(e) => setScenarioName(e.target.value)}
-                placeholder="Senaryo adı"
+                placeholder={t.scenarioName}
                 className={`w-28 rounded-lg px-2 py-1.5 border border-subtle ${inputCls}`}
               />
-              <button type="button" onClick={onSaveScenario} className="px-2 py-1.5 rounded-lg bg-secondary text-white" title="Mevcut girdileri kaydet">
-                Kaydet
+              <button type="button" onClick={onSaveScenario} className="px-2 py-1.5 rounded-lg bg-secondary text-white" title={t.saveTitle}>
+                {t.save}
               </button>
               {scenarios.length > 0 && (
                 <>
@@ -235,15 +260,15 @@ export default function App() {
                     value={selectedScenario}
                     onChange={(e) => onLoadScenario(e.target.value)}
                     className={`max-w-36 rounded-lg px-2 py-1.5 border border-subtle ${inputCls}`}
-                    title="Kayıtlı senaryoyu yükle"
+                    title={t.loadTitle}
                   >
-                    <option value="">Kayıtlı…</option>
+                    <option value="">{t.savedPlaceholder}</option>
                     {scenarios.map((s) => (
                       <option key={s.id} value={s.id}>{s.name}</option>
                     ))}
                   </select>
                   {selectedScenario && (
-                    <button type="button" onClick={onDeleteScenario} className="px-2 py-1.5 rounded-lg bg-red-500 text-white" title="Seçili senaryoyu sil">
+                    <button type="button" onClick={onDeleteScenario} className="px-2 py-1.5 rounded-lg bg-red-500 text-white" title={t.deleteTitle}>
                       <i className="fa-solid fa-trash-can"></i>
                     </button>
                   )}
@@ -257,7 +282,7 @@ export default function App() {
             <div className="mb-3 grid gap-2">
               {inputWarnings.map((w, i) => (
                 <div key={i} className="rounded-xl border border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-700 p-2.5 text-sm text-amber-900 dark:text-amber-200">
-                  <i className="fa-solid fa-circle-info mr-1.5 text-amber-600 dark:text-amber-400"></i>
+                  <i className="fa-solid fa-circle-info me-1.5 text-amber-600 dark:text-amber-400"></i>
                   {w}
                 </div>
               ))}
@@ -267,20 +292,20 @@ export default function App() {
           {/* 1) Tereke */}
           <details open className={groupCls}>
             <summary className={summaryCls}>
-              <span><i className="fa-solid fa-coins mr-2 text-accent"></i>Tereke</span>
+              <span><i className="fa-solid fa-coins me-2 text-accent"></i>{t.estate}</span>
               <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
             </summary>
             <div className="p-3 pt-0 grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className={labelCls}>Brüt miras (tereke)</label>
+                <label className={labelCls}>{t.gross}</label>
                 <NumberInput className={inputCls} valueDigits={form.gross} onChangeDigits={upd("gross")} />
               </div>
               <div>
-                <label className={labelCls}>Defin giderleri</label>
+                <label className={labelCls}>{t.funeral}</label>
                 <NumberInput className={inputCls} valueDigits={form.funeral} onChangeDigits={upd("funeral")} />
               </div>
               <div>
-                <label className={labelCls}>Borç / Mehir</label>
+                <label className={labelCls}>{t.debts}</label>
                 <NumberInput className={inputCls} valueDigits={form.debts} onChangeDigits={upd("debts")} />
               </div>
             </div>
@@ -289,65 +314,63 @@ export default function App() {
           {/* 2) Aile: eş, çocuklar, ebeveyn */}
           <details open className={groupCls}>
             <summary className={summaryCls}>
-              <span><i className="fa-solid fa-people-roof mr-2 text-accent"></i>Eş, Çocuklar ve Ebeveyn</span>
+              <span><i className="fa-solid fa-people-roof me-2 text-accent"></i>{t.family}</span>
               <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
             </summary>
             <div className="p-3 pt-0">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3 items-center">
                 <div className="flex items-center gap-3">
-                  <span className={labelCls}>Muris cinsiyeti</span>
+                  <span className={labelCls}>{t.decedentSex}</span>
                   <label className="text-sm inline-flex items-center gap-1">
-                    <input type="radio" name="sex" checked={form.decedentSex === "male"} onChange={() => upd("decedentSex")("male")} /> Erkek
+                    <input type="radio" name="sex" checked={form.decedentSex === "male"} onChange={() => upd("decedentSex")("male")} /> {t.male}
                   </label>
                   <label className="text-sm inline-flex items-center gap-1">
-                    <input type="radio" name="sex" checked={form.decedentSex === "female"} onChange={() => upd("decedentSex")("female")} /> Kadın
+                    <input type="radio" name="sex" checked={form.decedentSex === "female"} onChange={() => upd("decedentSex")("female")} /> {t.female}
                   </label>
                 </div>
 
                 {form.decedentSex === "male" ? (
                   <div>
-                    <label className={labelCls}>Eş sayısı</label>
+                    <label className={labelCls}>{t.wivesCount}</label>
                     <NumberInput className={inputCls} valueDigits={form.wivesCount} onChangeDigits={upd("wivesCount")} placeholder="0" />
                   </div>
                 ) : (
                   <div className="flex items-center gap-2">
                     <input id="husbandExists" type="checkbox" className="accent-secondary" checked={form.husbandExists} onChange={updChecked("husbandExists")} />
-                    <label htmlFor="husbandExists" className={labelCls}>Eşi (koca) var</label>
+                    <label htmlFor="husbandExists" className={labelCls}>{t.husbandExists}</label>
                   </div>
                 )}
               </div>
 
               <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
-                  <label className={labelCls}>Oğul sayısı (yaşayan)</label>
+                  <label className={labelCls}>{t.sons}</label>
                   <NumberInput className={inputCls} valueDigits={form.sons} onChangeDigits={upd("sons")} placeholder="0" />
                 </div>
                 <div>
-                  <label className={labelCls}>Kız sayısı (yaşayan)</label>
+                  <label className={labelCls}>{t.daughters}</label>
                   <NumberInput className={inputCls} valueDigits={form.daughters} onChangeDigits={upd("daughters")} placeholder="0" />
                 </div>
               </div>
 
               {renderHatRows({
                 field: "deceasedChildren",
-                title: "Vefat eden çocuklar (temsil için torun bilgisi)",
+                title: t.deceasedChildren,
                 emptyRow: { sex: "male", grandsons: "", granddaughters: "" },
-                sexOptions: ["Oğul", "Kız"],
-                aField: "grandsons",
-                bField: "granddaughters",
-                aLabel: "Torun (erkek)",
-                bLabel: "Torun (kız)",
-                emptyHint: "Vefat eden çocuk yoksa boş bırakın.",
+                sexOptions: [t.sonOpt, t.daughterOpt],
+                aField: "grandsons", bField: "granddaughters",
+                aLabel: t.grandsonM, bLabel: t.grandsonF,
+                emptyHint: t.deceasedChildrenHint,
               })}
 
               <div className="mt-4 border-t border-subtle dark:border-slate-700 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="flex items-center gap-2">
                   <input id="motherExists" type="checkbox" className="accent-secondary" checked={form.motherExists} onChange={updChecked("motherExists")} />
-                  <label htmlFor="motherExists" className={labelCls}>Anne hayatta</label>
+                  <label htmlFor="motherExists" className={labelCls}>{t.motherAlive}</label>
                 </div>
                 <div className="flex items-center gap-2">
                   <input id="fatherExists" type="checkbox" className="accent-secondary" checked={form.fatherExists} onChange={updChecked("fatherExists")} />
-                  <label htmlFor="fatherExists" className={labelCls}>Baba hayatta</label>
+                  <label htmlFor="fatherExists" className={labelCls}>{t.fatherAlive}</label>
                 </div>
               </div>
             </div>
@@ -356,84 +379,78 @@ export default function App() {
           {/* 3) Kardeşler */}
           <details open className={groupCls}>
             <summary className={summaryCls}>
-              <span><i className="fa-solid fa-people-group mr-2 text-accent"></i>Kardeşler</span>
+              <span><i className="fa-solid fa-people-group me-2 text-accent"></i>{t.siblings}</span>
               <i className="fa-solid fa-chevron-down text-primary/50 dark:text-slate-400"></i>
             </summary>
             <div className="p-3 pt-0">
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 <div>
-                  <label className={labelCls} title="Ana-bir kardeş (toplam)">Ana-bir (toplam)</label>
+                  <label className={labelCls}>{t.maternalTotal}</label>
                   <NumberInput className={inputCls} valueDigits={form.maternalSiblings} onChangeDigits={upd("maternalSiblings")} placeholder="0" />
                 </div>
                 <div>
-                  <label className={labelCls}>Öz erkek</label>
+                  <label className={labelCls}>{t.fullBrothers}</label>
                   <NumberInput className={inputCls} valueDigits={form.fullBrothers} onChangeDigits={upd("fullBrothers")} placeholder="0" />
                 </div>
                 <div>
-                  <label className={labelCls}>Öz kız</label>
+                  <label className={labelCls}>{t.fullSisters}</label>
                   <NumberInput className={inputCls} valueDigits={form.fullSisters} onChangeDigits={upd("fullSisters")} placeholder="0" />
                 </div>
                 <div>
-                  <label className={labelCls}>Baba-bir erkek</label>
+                  <label className={labelCls}>{t.halfPatBrothers}</label>
                   <NumberInput className={inputCls} valueDigits={form.halfPatBrothers} onChangeDigits={upd("halfPatBrothers")} placeholder="0" />
                 </div>
                 <div>
-                  <label className={labelCls}>Baba-bir kız</label>
+                  <label className={labelCls}>{t.halfPatSisters}</label>
                   <NumberInput className={inputCls} valueDigits={form.halfPatSisters} onChangeDigits={upd("halfPatSisters")} placeholder="0" />
                 </div>
               </div>
 
               {renderHatRows({
                 field: "deceasedFullSiblings",
-                title: "Vefat eden öz kardeşler",
+                title: t.deceasedFull,
                 emptyRow: { sex: "male", sons: "", daughters: "" },
-                sexOptions: ["Öz erkek", "Öz kız"],
-                aField: "sons",
-                bField: "daughters",
-                aLabel: "Çocuk (erkek)",
-                bLabel: "Çocuk (kız)",
-                emptyHint: "Vefat eden öz kardeş yoksa boş bırakın.",
+                sexOptions: [t.fullM, t.fullF],
+                aField: "sons", bField: "daughters",
+                aLabel: t.childM, bLabel: t.childF,
+                emptyHint: t.deceasedFullHint,
               })}
               {renderHatRows({
                 field: "deceasedHalfPatSiblings",
-                title: "Vefat eden baba-bir kardeşler",
+                title: t.deceasedHalfPat,
                 emptyRow: { sex: "male", sons: "", daughters: "" },
-                sexOptions: ["Baba-bir erkek", "Baba-bir kız"],
-                aField: "sons",
-                bField: "daughters",
-                aLabel: "Çocuk (erkek)",
-                bLabel: "Çocuk (kız)",
-                emptyHint: "Vefat eden baba-bir kardeş yoksa boş bırakın.",
+                sexOptions: [t.halfM, t.halfF],
+                aField: "sons", bField: "daughters",
+                aLabel: t.childM, bLabel: t.childF,
+                emptyHint: t.deceasedHalfPatHint,
               })}
               {renderHatRows({
                 field: "deceasedMaternalSiblings",
-                title: "Vefat eden anne-bir kardeşler",
+                title: t.deceasedMaternal,
                 emptyRow: { sons: "", daughters: "" },
                 sexOptions: null,
-                aField: "sons",
-                bField: "daughters",
-                aLabel: "Çocuk (erkek)",
-                bLabel: "Çocuk (kız)",
-                emptyHint: "Vefat eden anne-bir kardeş yoksa boş bırakın.",
+                aField: "sons", bField: "daughters",
+                aLabel: t.childM, bLabel: t.childF,
+                emptyHint: t.deceasedMaternalHint,
               })}
             </div>
           </details>
 
           {/* Aksiyonlar */}
           <div className="no-print flex items-center justify-center gap-3 pt-6 flex-wrap">
-            <button onClick={shareLink} className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90 shadow-sm" title="Bu hesabın linkini paylaş">
-              <i className="fa-solid fa-share-nodes mr-1.5"></i>Paylaş
+            <button onClick={shareLink} className="px-4 py-2 rounded-xl bg-primary text-white hover:opacity-90 shadow-sm" title={t.shareTitle}>
+              <i className="fa-solid fa-share-nodes me-1.5"></i>{t.share}
             </button>
             <button onClick={() => window.print()} className="px-4 py-2 rounded-xl bg-accent text-ink hover:opacity-90 shadow-sm">
-              Yazdır / PDF
+              {t.print}
             </button>
-            <button onClick={clearForm} className="px-4 py-2 rounded-xl bg-secondary text-white hover:opacity-90 shadow-sm" title="Tüm alanları sıfırla">
-              Temizle
+            <button onClick={clearForm} className="px-4 py-2 rounded-xl bg-secondary text-white hover:opacity-90 shadow-sm" title={t.clearTitle}>
+              {t.clear}
             </button>
           </div>
           {shareMsg && (
             <p className="text-center text-sm mt-2 text-secondary dark:text-teal-300" role="status">
-              <i className="fa-solid fa-check mr-1"></i>{shareMsg}
+              <i className="fa-solid fa-check me-1"></i>{shareMsg}
             </p>
           )}
         </section>
@@ -451,11 +468,9 @@ export default function App() {
           href="#sonuc"
           className="no-print md:hidden fixed bottom-0 inset-x-0 z-20 bg-primary text-white px-4 py-3 flex items-center justify-between shadow-[0_-4px_12px_rgba(0,0,0,.15)] pb-[max(0.75rem,env(safe-area-inset-bottom))]"
         >
-          <span className="text-sm opacity-90">Dağıtılan</span>
-          <span className="font-semibold">
-            {result.sumAllocated.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ₺
-          </span>
-          <span className="text-sm underline">Sonuca git</span>
+          <span className="text-sm opacity-90">{t.distributed}</span>
+          <span className="font-semibold">{fmtMoney(result.sumAllocated)}</span>
+          <span className="text-sm underline">{t.goToResult}</span>
         </a>
       )}
 
@@ -463,5 +478,6 @@ export default function App() {
       <AboutModal open={aboutOpen} onClose={() => setAboutOpen(false)} />
       <VersesModal open={versesOpen} onClose={() => setVersesOpen(false)} />
     </div>
+    </LocaleProvider>
   );
 }

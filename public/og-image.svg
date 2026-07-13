@@ -1,12 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">
   <defs>
     <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#2E5077"/>
-      <stop offset="100%" stop-color="#4DA1A9"/>
+      <stop offset="0%" stop-color="#1F4D3F"/>
+      <stop offset="100%" stop-color="#2E7D64"/>
     </linearGradient>
   </defs>
   <rect width="1200" height="630" fill="url(#bg)"/>
-  <g fill="#F6F4F0">
+  <g fill="#F8F5EC">
     <text x="80" y="170" font-size="64" font-family="Segoe UI, Roboto, Arial, sans-serif" font-weight="700">Feraiz.com</text>
     <text x="80" y="230" font-size="30" font-family="Segoe UI, Roboto, Arial, sans-serif" opacity="0.9">Ayet Bazlı Miras Hesaplayıcı</text>
   </g>

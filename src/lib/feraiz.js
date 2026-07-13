@@ -1,19 +1,21 @@
-// Hesap motoru v4 — anayasa.md (v2.7) ile uyumlu
+// Hesap motoru v5 — anayasa.md (v2.7) ile uyumlu, çok dilli
 // Girdi: sayısal alanlar number; bayraklar boolean; opsiyonel temsili hat listeleri
 // - deceasedChildren: Array<{sex:'male'|'female', grandsons:number, granddaughters:number}>
 // - deceasedFullSiblings / deceasedHalfPatSiblings: Array<{sex:'male'|'female', sons:number, daughters:number}>
 // - deceasedMaternalSiblings: Array<{sons:number, daughters:number}>
 //
-// Dönüş: { netForHeirs, rows, sumAllocated, remainder, warnings, steps }
+// İkinci parametre dil sözlüğüdür (locales[x].engine); varsayılan Türkçedir ve
+// feraiz.test.js Türkçe metinlere karşı doğrular.
+//
+// Dönüş: { netForHeirs, rows, sumAllocated, remainder, warnings, notes, steps }
 // MADDE 9 invariantı: sumAllocated + remainder === netForHeirs (para asla sessizce kaybolmaz)
 
-const fmtTL = (n) =>
-  Number(n).toLocaleString("tr-TR", { maximumFractionDigits: 2 });
+import trLocale from "../i18n/locales/tr.js";
 
 // Yaşayan alıcısı olmayan temsil satırları (hat) hesaba hiç girmemelidir:
 // pay ağırlığına girer ama dağıtılamazsa para ortada kalır ve senaryo tespiti
 // (alt soy / kardeş varlığı) yanlış döner. Bu yüzden girişte elenir.
-function normalizeInputs(raw) {
+function normalizeInputs(raw, L) {
   const warnings = [];
 
   const filterHats = (list, weightOf, label) => {
@@ -21,7 +23,7 @@ function normalizeInputs(raw) {
     const kept = [];
     for (const item of list) {
       if (weightOf(item) > 0) kept.push(item);
-      else warnings.push(`${label} satırı yok sayıldı: yaşayan mirasçısı (temsilcisi) yok.`);
+      else warnings.push(L.warnHatIgnored(label));
     }
     return kept;
   };
@@ -44,26 +46,10 @@ function normalizeInputs(raw) {
       fullSisters: toN(raw.fullSisters),
       halfPatBrothers: toN(raw.halfPatBrothers),
       halfPatSisters: toN(raw.halfPatSisters),
-      deceasedChildren: filterHats(
-        raw.deceasedChildren,
-        (c) => 2 * toN(c.grandsons) + toN(c.granddaughters),
-        "Vefat eden çocuk"
-      ),
-      deceasedFullSiblings: filterHats(
-        raw.deceasedFullSiblings,
-        (s) => 2 * toN(s.sons) + toN(s.daughters),
-        "Vefat eden öz kardeş"
-      ),
-      deceasedHalfPatSiblings: filterHats(
-        raw.deceasedHalfPatSiblings,
-        (s) => 2 * toN(s.sons) + toN(s.daughters),
-        "Vefat eden baba-bir kardeş"
-      ),
-      deceasedMaternalSiblings: filterHats(
-        raw.deceasedMaternalSiblings,
-        (s) => 2 * toN(s.sons) + toN(s.daughters),
-        "Vefat eden anne-bir kardeş"
-      ),
+      deceasedChildren: filterHats(raw.deceasedChildren, (c) => 2 * toN(c.grandsons) + toN(c.granddaughters), L.hat.child),
+      deceasedFullSiblings: filterHats(raw.deceasedFullSiblings, (s) => 2 * toN(s.sons) + toN(s.daughters), L.hat.full),
+      deceasedHalfPatSiblings: filterHats(raw.deceasedHalfPatSiblings, (s) => 2 * toN(s.sons) + toN(s.daughters), L.hat.halfPat),
+      deceasedMaternalSiblings: filterHats(raw.deceasedMaternalSiblings, (s) => 2 * toN(s.sons) + toN(s.daughters), L.hat.maternal),
     },
   };
 }
@@ -79,18 +65,16 @@ function distributeHat(rows, share, sons, daughters, maleLabel, femaleLabel, bas
     rows.push({ heir: `${femaleLabel} #${i}`, fraction: `1/${w}`, amount: 1 * u, basis });
 }
 
-export function computeDistribution(raw) {
-  const { f, warnings } = normalizeInputs(raw);
+export function computeDistribution(raw, L = trLocale.engine) {
+  const { f, warnings } = normalizeInputs(raw, L);
   const rows = [];
   const steps = [];
 
   // 0) Net tespit: Toplam - (defin + borç)  (MADDE 2)
   const netForHeirs = Math.max(0, f.gross - f.funeral - f.debts);
-  steps.push(
-    `Net tereke: ${fmtTL(f.gross)} − defin ${fmtTL(f.funeral)} − borç ${fmtTL(f.debts)} = ${fmtTL(netForHeirs)} ₺ (Madde 2)`
-  );
+  steps.push(L.steps.net(f.gross, f.funeral, f.debts, netForHeirs));
   if (f.gross > 0 && netForHeirs === 0) {
-    warnings.push("Defin giderleri ve borçlar terekeyi tüketiyor; dağıtılacak miras kalmadı (Madde 2).");
+    warnings.push(L.warnConsumed);
   }
 
   const sons = f.sons;
@@ -119,16 +103,14 @@ export function computeDistribution(raw) {
       spouseTotal = netForHeirs * (hasDescendants ? 1 / 8 : 1 / 4);
       const each = spouseTotal / f.wivesCount;
       for (let i = 1; i <= f.wivesCount; i++) {
-        rows.push({ heir: `Eş #${i} (kadın)`, fraction: fracLabel, amount: each, basis: "Eş payı (önce)" });
+        rows.push({ heir: L.heirs.wife(i), fraction: fracLabel, amount: each, basis: L.basis.spouseFirst });
       }
-      steps.push(
-        `Eş payı önce ayrıldı: ${fracLabel} = ${fmtTL(spouseTotal)} ₺${f.wivesCount > 1 ? ` (${f.wivesCount} hanım arasında eşit)` : ""} (Madde 4)`
-      );
+      steps.push(L.steps.spouseWives(fracLabel, spouseTotal, f.wivesCount));
     } else {
       const fracLabel = hasDescendants ? "1/4" : "1/2";
       spouseTotal = netForHeirs * (hasDescendants ? 1 / 4 : 1 / 2);
-      rows.push({ heir: "Eş (erkek)", fraction: fracLabel, amount: spouseTotal, basis: "Eş payı (önce)" });
-      steps.push(`Eş (koca) payı önce ayrıldı: ${fracLabel} = ${fmtTL(spouseTotal)} ₺ (Madde 4)`);
+      rows.push({ heir: L.heirs.husband, fraction: fracLabel, amount: spouseTotal, basis: L.basis.spouseFirst });
+      steps.push(L.steps.spouseHusband(fracLabel, spouseTotal));
     }
   }
 
@@ -140,14 +122,14 @@ export function computeDistribution(raw) {
     let parentTotal = 0;
     if (mother) {
       const s = remainder * (1 / 6);
-      rows.push({ heir: "Anne", fraction: "1/6 (alt soy var)", amount: s, basis: "Anne payı" });
-      steps.push(`Anne payı: kalanın 1/6'sı = ${fmtTL(s)} ₺ (Madde 6b)`);
+      rows.push({ heir: L.heirs.mother, fraction: L.fr.sixthDesc, amount: s, basis: L.basis.mother });
+      steps.push(L.steps.motherSixth(s));
       parentTotal += s;
     }
     if (father) {
       const s = remainder * (1 / 6);
-      rows.push({ heir: "Baba", fraction: "1/6 (alt soy var)", amount: s, basis: "Baba payı" });
-      steps.push(`Baba payı: kalanın 1/6'sı = ${fmtTL(s)} ₺ (Madde 6b)`);
+      rows.push({ heir: L.heirs.father, fraction: L.fr.sixthDesc, amount: s, basis: L.basis.father });
+      steps.push(L.steps.fatherSixth(s));
       parentTotal += s;
     }
     remainder -= parentTotal;
@@ -155,23 +137,21 @@ export function computeDistribution(raw) {
     if (mother && father) {
       // Anne 1/3, kalan babaya (MADDE 7b)
       const motherShare = remainder * (1 / 3);
-      rows.push({ heir: "Anne", fraction: "1/3 (alt soy yok)", amount: motherShare, basis: "Anne payı" });
+      rows.push({ heir: L.heirs.mother, fraction: L.fr.thirdNoDesc, amount: motherShare, basis: L.basis.mother });
       const fatherShare = remainder - motherShare;
-      rows.push({ heir: "Baba", fraction: "(kalan)", amount: fatherShare, basis: "Baba payı (kalan)" });
-      steps.push(
-        `Alt soy yok: Anne kalanın 1/3'ü (${fmtTL(motherShare)} ₺), kalan tamamı Baba'ya (${fmtTL(fatherShare)} ₺) (Madde 7b)`
-      );
+      rows.push({ heir: L.heirs.father, fraction: L.fr.residue, amount: fatherShare, basis: L.basis.fatherResidue });
+      steps.push(L.steps.motherThirdFatherRest(motherShare, fatherShare));
       remainder = 0;
     } else if (mother && !father) {
       // Baba yok: kardeş varsa anne 1/6, yoksa kalanın tamamı (MADDE 7b.i + 7c reddiye)
       if (siblingsExist) {
         const motherShare = remainder * (1 / 6);
-        rows.push({ heir: "Anne", fraction: "1/6 (kardeş var)", amount: motherShare, basis: "Anne payı" });
-        steps.push(`Anne payı: kardeş var, kalanın 1/6'sı = ${fmtTL(motherShare)} ₺ (Madde 7b.i)`);
+        rows.push({ heir: L.heirs.mother, fraction: L.fr.sixthSiblings, amount: motherShare, basis: L.basis.mother });
+        steps.push(L.steps.motherSixthSib(motherShare));
         remainder -= motherShare;
       } else {
-        rows.push({ heir: "Anne", fraction: "(kalan)", amount: remainder, basis: "Anne payı (kalan)" });
-        steps.push(`Kalanın tamamı Anne'ye: ${fmtTL(remainder)} ₺ (Madde 7c reddiye)`);
+        rows.push({ heir: L.heirs.mother, fraction: L.fr.residue, amount: remainder, basis: L.basis.motherResidue });
+        steps.push(L.steps.allToMother(remainder));
         remainder = 0;
       }
       // Anne var, baba yok: paternel taraf kardeşleri (baba-bir + öz) devreye girer;
@@ -185,25 +165,25 @@ export function computeDistribution(raw) {
         if (totalW > 0) {
           const unit = remainder / totalW;
           for (let i = 1; i <= hpb; i++)
-            rows.push({ heir: `Baba-bir erkek kardeş #${i}`, fraction: `2/${totalW}`, amount: 2 * unit, basis: "Baba yok — 2:1" });
+            rows.push({ heir: L.heirs.halfBrother(i), fraction: `2/${totalW}`, amount: 2 * unit, basis: L.basis.noFather21 });
           for (let i = 1; i <= hps; i++)
-            rows.push({ heir: `Baba-bir kız kardeş #${i}`, fraction: `1/${totalW}`, amount: 1 * unit, basis: "Baba yok — 2:1" });
+            rows.push({ heir: L.heirs.halfSister(i), fraction: `1/${totalW}`, amount: 1 * unit, basis: L.basis.noFather21 });
           for (const ds of f.deceasedHalfPatSiblings) {
             distributeHat(rows, (ds.sex === "male" ? 2 : 1) * unit, toN(ds.sons), toN(ds.daughters),
-              "Yeğen (erkek) — baba-bir (temsil)", "Yeğen (kız) — baba-bir (temsil)", "Temsil — baba-bir");
+              L.heirs.nephewM.halfPat, L.heirs.nephewF.halfPat, L.basis.reprHalfPat);
           }
           const motherFromFull = weightFull * unit;
           if (motherFromFull > 0) {
-            rows.push({ heir: "Anne", fraction: "(öz kardeş payı)", amount: motherFromFull, basis: "Öz kardeş payı anneye aktarıldı" });
-            steps.push(`Öz kardeş payları Anne'ye aktarıldı: ${fmtTL(motherFromFull)} ₺ (baba yok)`);
+            rows.push({ heir: L.heirs.mother, fraction: L.fr.fullSibShare, amount: motherFromFull, basis: L.basis.fullToMother });
+            steps.push(L.steps.fullToMother(motherFromFull));
           }
-          if (weightHalf > 0) steps.push(`Baba-bir kardeşler kalanı 2:1 ile paylaştı (Madde 5)`);
+          if (weightHalf > 0) steps.push(L.steps.halfPat21);
           remainder = 0;
         } else {
           // Yalnız anne-bir kardeş var: anne hayattayken anne-bir kardeşler mirasçı olmaz
           // (Madde 8A şartı: anne hayatta değil) → kalan anneye (reddiye, para ortada kalmaz)
-          rows.push({ heir: "Anne", fraction: "(kalan)", amount: remainder, basis: "Reddiye — kalan anneye" });
-          steps.push(`Kalan Anne'ye verildi (anne-bir kardeşler anne hayattayken mirasçı olmaz): ${fmtTL(remainder)} ₺`);
+          rows.push({ heir: L.heirs.mother, fraction: L.fr.residue, amount: remainder, basis: L.basis.raddToMother });
+          steps.push(L.steps.raddToMother(remainder));
           remainder = 0;
         }
       }
@@ -214,17 +194,17 @@ export function computeDistribution(raw) {
         const matShare = matHats === 1 ? remainder * (1 / 6) : remainder * (1 / 3);
         const eachHat = matShare / matHats;
         for (let i = 1; i <= matAlive; i++)
-          rows.push({ heir: `Anne-bir kardeş #${i}`, fraction: matHats === 1 ? "1/6" : "(toplam 1/3, eşit)", amount: eachHat, basis: "Anne yok — anne-bir" });
+          rows.push({ heir: L.heirs.matSibling(i), fraction: matHats === 1 ? L.fr.sixth : L.fr.thirdEqual, amount: eachHat, basis: L.basis.noMotherMat });
         for (const dm of f.deceasedMaternalSiblings) {
           distributeHat(rows, eachHat, toN(dm.sons), toN(dm.daughters),
-            "Yeğen (erkek) — anne-bir hattı (temsil)", "Yeğen (kız) — anne-bir hattı (temsil)", "Temsil — anne-bir");
+            L.heirs.nephewM.maternal, L.heirs.nephewF.maternal, L.basis.reprMat);
         }
-        steps.push(`Anne-bir kardeş payı: ${matHats === 1 ? "1/6" : "toplam 1/3, eşit"} = ${fmtTL(matShare)} ₺ (Madde 8A)`);
+        steps.push(L.steps.matNoMother(matHats === 1 ? L.fr.sixth : L.fr.thirdEqualShort, matShare));
         remainder -= matShare;
       }
       if (remainder > 0) {
-        rows.push({ heir: "Baba", fraction: "(kalan — öz kardeş payı dahil)", amount: remainder, basis: "Anne yok — öz kardeş payı babaya" });
-        steps.push(`Kalanın tamamı Baba'ya (öz kardeş payı dahil): ${fmtTL(remainder)} ₺ (Madde 7b.ii)`);
+        rows.push({ heir: L.heirs.father, fraction: L.fr.residueInclFullSib, amount: remainder, basis: L.basis.noMotherToFather });
+        steps.push(L.steps.residueFather(remainder));
         remainder = 0;
       }
     }
@@ -237,18 +217,15 @@ export function computeDistribution(raw) {
     const unit = remainder / childWeight;
 
     for (let i = 1; i <= sons; i++)
-      rows.push({ heir: `Oğul #${i}`, fraction: `2/${childWeight}`, amount: 2 * unit, basis: "Alt soy 2:1" });
+      rows.push({ heir: L.heirs.son(i), fraction: `2/${childWeight}`, amount: 2 * unit, basis: L.basis.desc21 });
     for (let i = 1; i <= daughters; i++)
-      rows.push({ heir: `Kız #${i}`, fraction: `1/${childWeight}`, amount: 1 * unit, basis: "Alt soy 2:1" });
+      rows.push({ heir: L.heirs.daughter(i), fraction: `1/${childWeight}`, amount: 1 * unit, basis: L.basis.desc21 });
 
     for (const dc of f.deceasedChildren) {
-      const parentLabel = dc.sex === "male" ? "oğul" : "kız";
       distributeHat(rows, (dc.sex === "male" ? 2 : 1) * unit, toN(dc.grandsons), toN(dc.granddaughters),
-        `Torun (erkek) — temsil (ebeveyn ${parentLabel})`, `Torun (kız) — temsil (ebeveyn ${parentLabel})`, "Temsil 2:1 (torunlar)");
+        L.heirs.grandsonLabel(dc.sex), L.heirs.granddaughterLabel(dc.sex), L.basis.repr21);
     }
-    steps.push(
-      `Kalan alt soya 2:1 dağıtıldı (toplam ${childWeight} hisse, hisse değeri ${fmtTL(unit)} ₺) (Madde 5/6c${f.deceasedChildren.length ? ", temsil: Madde 5.1" : ""})`
-    );
+    steps.push(L.steps.desc21(childWeight, unit, f.deceasedChildren.length > 0));
     remainder = 0;
   }
 
@@ -268,49 +245,45 @@ export function computeDistribution(raw) {
       const isRadd = patAllW === 0;
       const matShare = isRadd ? remainder : baseShare;
       const eachHat = matShare / matHats;
-      const fracLabel = matHats === 1 ? "1/6" : "(toplam 1/3, eşit)";
-      const label = isRadd ? `${fracLabel} + radd (kalan)` : fracLabel;
+      const fracLabel = matHats === 1 ? L.fr.sixth : L.fr.thirdEqual;
+      const label = isRadd ? L.fr.plusRadd(fracLabel) : fracLabel;
       for (let i = 1; i <= matAlive; i++)
-        rows.push({ heir: `Anne-bir kardeş #${i}`, fraction: label, amount: eachHat, basis: "Kelâle — anne-bir" });
+        rows.push({ heir: L.heirs.matSibling(i), fraction: label, amount: eachHat, basis: L.basis.kelaleMat });
       for (const dm of f.deceasedMaternalSiblings) {
         distributeHat(rows, eachHat, toN(dm.sons), toN(dm.daughters),
-          "Yeğen (erkek) — anne-bir hattı (temsil)", "Yeğen (kız) — anne-bir hattı (temsil)", "Temsil — anne-bir");
+          L.heirs.nephewM.maternal, L.heirs.nephewF.maternal, L.basis.reprMat);
       }
-      steps.push(
-        `Anne-bir kardeş payı: ${fracLabel} = ${fmtTL(baseShare)} ₺${isRadd ? `; başka kardeş yok, kalan da kendilerine verildi (radd) → toplam ${fmtTL(matShare)} ₺` : ""} (Madde 8A)`
-      );
+      steps.push(L.steps.kelaleMat(matHats === 1 ? L.fr.sixth : L.fr.thirdEqualShort, baseShare, isRadd, matShare));
       remainder -= matShare;
     }
 
-    // Öz + baba-bir kardeşler tek havuzda 2:1 + temsil (MADDE 8C — mevcut yorum)
+    // Öz + baba-bir kardeşler tek havuzda 2:1 + temsil (MADDE 8C — hacb uygulanmaz, onaylı)
     if (remainder > 0 && patAllW > 0) {
       const unit = remainder / patAllW;
       // Havuz yalnız kız kardeşlerden oluşuyorsa Nisâ 4/176 + reddiye şeffaf etiketi
       const onlySisters = fullB + hpb === 0 &&
         f.deceasedFullSiblings.every((s) => s.sex === "female") &&
         f.deceasedHalfPatSiblings.every((s) => s.sex === "female");
-      const sisterLabel = patAllW === 1 ? "1/2 + reddiye (Nisâ 4/176)" : "2/3 eşit + reddiye (Nisâ 4/176)";
+      const sisterLabel = patAllW === 1 ? L.fr.sisterHalf : L.fr.sisterTwoThirds;
 
       for (let i = 1; i <= fullB; i++)
-        rows.push({ heir: `Öz erkek kardeş #${i}`, fraction: `2/${patAllW}`, amount: 2 * unit, basis: "Kelâle — 2:1" });
+        rows.push({ heir: L.heirs.fullBrother(i), fraction: `2/${patAllW}`, amount: 2 * unit, basis: L.basis.kelale21 });
       for (let i = 1; i <= fullS; i++)
-        rows.push({ heir: `Öz kız kardeş #${i}`, fraction: onlySisters ? sisterLabel : `1/${patAllW}`, amount: 1 * unit, basis: "Kelâle — 2:1" });
+        rows.push({ heir: L.heirs.fullSister(i), fraction: onlySisters ? sisterLabel : `1/${patAllW}`, amount: 1 * unit, basis: L.basis.kelale21 });
       for (let i = 1; i <= hpb; i++)
-        rows.push({ heir: `Baba-bir erkek kardeş #${i}`, fraction: `2/${patAllW}`, amount: 2 * unit, basis: "Kelâle — 2:1" });
+        rows.push({ heir: L.heirs.halfBrother(i), fraction: `2/${patAllW}`, amount: 2 * unit, basis: L.basis.kelale21 });
       for (let i = 1; i <= hps; i++)
-        rows.push({ heir: `Baba-bir kız kardeş #${i}`, fraction: onlySisters ? sisterLabel : `1/${patAllW}`, amount: 1 * unit, basis: "Kelâle — 2:1" });
+        rows.push({ heir: L.heirs.halfSister(i), fraction: onlySisters ? sisterLabel : `1/${patAllW}`, amount: 1 * unit, basis: L.basis.kelale21 });
 
       for (const ds of f.deceasedFullSiblings) {
         distributeHat(rows, (ds.sex === "male" ? 2 : 1) * unit, toN(ds.sons), toN(ds.daughters),
-          "Yeğen (erkek) — öz (temsil)", "Yeğen (kız) — öz (temsil)", "Temsil — öz");
+          L.heirs.nephewM.full, L.heirs.nephewF.full, L.basis.reprFull);
       }
       for (const ds of f.deceasedHalfPatSiblings) {
         distributeHat(rows, (ds.sex === "male" ? 2 : 1) * unit, toN(ds.sons), toN(ds.daughters),
-          "Yeğen (erkek) — baba-bir (temsil)", "Yeğen (kız) — baba-bir (temsil)", "Temsil — baba-bir");
+          L.heirs.nephewM.halfPat, L.heirs.nephewF.halfPat, L.basis.reprHalfPat);
       }
-      steps.push(
-        `Kalan öz ve baba-bir kardeşlere ${onlySisters ? "Nisâ 4/176'ya göre (reddiye dahil)" : "2:1 ile"} dağıtıldı (toplam ${patAllW} hisse) (Madde 8/5)`
-      );
+      steps.push(L.steps.kelalePool(patAllW, onlySisters));
       remainder = 0;
     }
   }
@@ -322,22 +295,18 @@ export function computeDistribution(raw) {
   const notes = [];
   if (remainder > 1e-9) {
     rows.push({
-      heir: "Devlet / ilgili otorite",
-      fraction: "(kalan)",
+      heir: L.heirs.publicAuthority,
+      fraction: L.fr.residue,
       amount: remainder,
-      basis: "Amme malı — mirasçısı olmayan kalan (Madde 9.1)",
+      basis: L.basis.amme,
       info: true,
     });
-    notes.push(
-      `Mirasçısı bulunmayan ${fmtTL(remainder)} ₺, amme malı olur; devlete / ilgili otoriteye kalır. (Kaynak: Süleymaniye Vakfı)`
-    );
-    steps.push(
-      `Mirasçısı olmayan kalan (${fmtTL(remainder)} ₺) amme malı olarak devlete / ilgili otoriteye ayrıldı (Madde 9.1)`
-    );
+    notes.push(L.notes.publicRemainder(remainder));
+    steps.push(L.steps.publicRemainder(remainder));
   } else {
     remainder = 0;
     if (netForHeirs > 0 && rows.length > 0) {
-      steps.push(`Kontrol: dağıtılan toplam ${fmtTL(sumAllocated)} ₺ = net tereke ✓ (Madde 9)`);
+      steps.push(L.steps.check(sumAllocated));
     }
   }
 
