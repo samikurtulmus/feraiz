@@ -14,7 +14,8 @@ export default function GoogleAd({ slot, className = '', style = {}, format = 'a
     }
   }, [slot]);
 
-  const client = import.meta.env.VITE_GADS_CLIENT || 'ca-pub-xxxxxxxxxxxxxxxx';
+  // Fallback, index.html'de yüklü gerçek AdSense client ile aynı tutulur
+  const client = import.meta.env.VITE_GADS_CLIENT || 'ca-pub-1688340004546677';
   const isTest = import.meta.env.MODE !== 'production' || import.meta.env.VITE_GADS_TEST === 'on';
 
   return (
