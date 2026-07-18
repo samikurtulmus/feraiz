@@ -12,7 +12,7 @@ const html = `<!doctype html>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Hesaplama Kuralları | Feraiz.com</title>
-  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  <link rel="icon" href="/favicon.ico" />
   <meta name="description" content="Feraiz.com miras hesaplama motorunun dayandığı kuralların tam metni" />
   <link rel="canonical" href="https://feraiz.com/kurallar.html" />
   <meta property="og:title" content="Hesaplama Kuralları | Feraiz.com" />
