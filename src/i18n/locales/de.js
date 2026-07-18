@@ -12,9 +12,9 @@ export default {
   moneySuffix: "",
 
   seo: {
-    title: "Feraiz.com | Islamischer Erbrechner nach dem Koran",
+    title: "Islamischer Erbrechner (Faraid) nach dem Koran | Feraiz.com",
     description:
-      "Faraid: die im Koran festgelegten Erbanteile — ein islamischer Erbrechner mit Schritt-für-Schritt-Erklärung auf Grundlage der Verse.",
+      "Erbanteile nach dem Koran berechnen: Ehepartner, Kinder, Eltern und Geschwister — Schritt für Schritt mit Erklärung. Kostenlos und mehrsprachig.",
     ogLocale: "de_DE",
   },
 

@@ -13,9 +13,9 @@ export default {
   moneySuffix: " ₺",
 
   seo: {
-    title: "Feraiz.com | Ayet Bazlı Miras Hesaplayıcı",
+    title: "Feraiz Hesaplama — Kur'an'a Göre Miras Payı Hesaplayıcı | Feraiz.com",
     description:
-      "Feraiz: Kur'an'da belirlenmiş miras payları - ayet ve meallere dayalı, adım adım açıklamalı miras hesaplayıcı.",
+      "Kur'an'a göre miras paylaşımı: eş, çocuk, anne-baba ve kardeş paylarını ayet esaslı, adım adım hesaplayın. Ücretsiz feraiz hesaplama aracı — Süleymaniye Vakfı meali esaslı.",
     ogLocale: "tr_TR",
   },
 

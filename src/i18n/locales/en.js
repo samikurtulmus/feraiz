@@ -12,9 +12,9 @@ export default {
   moneySuffix: "",
 
   seo: {
-    title: "Feraiz.com | Quran-Based Islamic Inheritance Calculator",
+    title: "Islamic Inheritance Calculator (Faraid) — Quran-Based | Feraiz.com",
     description:
-      "Faraid: inheritance shares set in the Quran — a step-by-step Islamic inheritance calculator based on the verses and their rendering.",
+      "Calculate Islamic inheritance shares (faraid) according to the Quran: spouse, children, parents and siblings, step by step with explanations. Free and multilingual.",
     ogLocale: "en_US",
   },
 

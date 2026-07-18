@@ -12,9 +12,9 @@ export default {
   moneySuffix: "",
 
   seo: {
-    title: "Feraiz.com | Calculateur d'héritage islamique selon le Coran",
+    title: "Calculateur d'héritage islamique (Faraid) selon le Coran | Feraiz.com",
     description:
-      "Faraid : les parts d'héritage fixées dans le Coran — un calculateur d'héritage islamique expliqué pas à pas, fondé sur les versets.",
+      "Calculez les parts d'héritage selon le Coran : conjoint, enfants, parents, frères et sœurs — pas à pas avec explications. Gratuit et multilingue.",
     ogLocale: "fr_FR",
   },
 
