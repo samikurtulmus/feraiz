@@ -37,13 +37,21 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
         <nav className="mt-3">
           <div className="px-4">
             <ul className="flex gap-4 text-sm flex-wrap justify-center w-full">
-              <li><a href={import.meta.env.BASE_URL + 'meal/'} className="hover:underline text-light">{t.navVerses}</a></li>
+              {/* Mobilde linkler de simgelerle aynı çerçeveli buton görünümünde */}
+              <li>
+                <a
+                  href={import.meta.env.BASE_URL + 'meal/'}
+                  className="hover:underline text-light rounded-md bg-white/10 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0"
+                >
+                  {t.navVerses}
+                </a>
+              </li>
               <li>
                 <a
                   href="https://ayet.cc/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline text-light"
+                  className="hover:underline text-light rounded-md bg-white/10 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0"
                 >
                   <span className="md:hidden">{t.navMeal}</span>
                   <span className="hidden md:inline">{t.navMealLong}</span>
@@ -64,7 +72,7 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
                 <select
                   value={lang}
                   onChange={(e) => setLang(e.target.value)}
-                  className="absolute inset-0 w-full h-full opacity-0"
+                  className="absolute inset-0 w-full h-full opacity-0 [&>option]:text-ink [&>option]:bg-white"
                   title={t.langLabel}
                   aria-label={t.langLabel}
                 >
