@@ -36,12 +36,12 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
         <p className="opacity-90 mt-1">{t.tagline}</p>
         <nav className="mt-3">
           <div className="px-4">
-            <ul className="flex gap-4 text-sm flex-wrap justify-center w-full">
-              {/* Mobilde linkler de simgelerle aynı çerçeveli buton görünümünde */}
+            <ul className="flex items-center gap-2 sm:gap-4 text-sm flex-wrap justify-center w-full">
+              {/* Mobilde tüm öğeler aynı yükseklikte (h-8) ortalanmış hap; geniş ekranda düz metin */}
               <li>
                 <a
                   href={import.meta.env.BASE_URL + 'meal/'}
-                  className="hover:underline text-light rounded-md bg-white/10 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0"
+                  className="inline-flex items-center h-8 px-2.5 rounded-md bg-white/10 sm:h-auto sm:px-0 sm:bg-transparent hover:underline text-light"
                 >
                   {t.navVerses}
                 </a>
@@ -51,7 +51,7 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
                   href="https://ayet.cc/"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="hover:underline text-light rounded-md bg-white/10 px-2 py-1 sm:bg-transparent sm:px-0 sm:py-0"
+                  className="inline-flex items-center h-8 px-2.5 rounded-md bg-white/10 sm:h-auto sm:px-0 sm:bg-transparent hover:underline text-light"
                 >
                   <span className="md:hidden">{t.navMeal}</span>
                   <span className="hidden md:inline">{t.navMealLong}</span>
@@ -59,15 +59,20 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
               </li>
               {/* Hakkında: geniş ekranda metin, mobilde bilgi simgesi */}
               <li>
-                <button onClick={onOpenAbout} className="hover:underline" aria-label={t.navAbout} title={t.navAbout}>
+                <button
+                  onClick={onOpenAbout}
+                  className="inline-flex items-center h-8 px-2.5 rounded-md bg-white/10 sm:h-auto sm:px-0 sm:bg-transparent hover:underline"
+                  aria-label={t.navAbout}
+                  title={t.navAbout}
+                >
                   <span className="hidden sm:inline">{t.navAbout}</span>
-                  <i className="fa-solid fa-circle-info text-base sm:hidden rounded-md bg-white/10 px-2 py-1" aria-hidden="true"></i>
+                  <i className="fa-solid fa-circle-info sm:hidden leading-none" aria-hidden="true"></i>
                 </button>
               </li>
               {/* Mobil: dil = küre simgesi (üzerinde görünmez select, dokununca telefonun listesi açılır) */}
               <li className="sm:hidden relative">
-                <span className="inline-block rounded-md bg-white/10 px-2 py-1" aria-hidden="true">
-                  <i className="fa-solid fa-globe text-base"></i>
+                <span className="inline-flex items-center h-8 px-2.5 rounded-md bg-white/10" aria-hidden="true">
+                  <i className="fa-solid fa-globe leading-none"></i>
                 </span>
                 <select
                   value={lang}
@@ -86,11 +91,11 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
                 <button
                   type="button"
                   onClick={onToggleTheme}
-                  className="rounded-md bg-white/10 px-2 py-1"
+                  className="inline-flex items-center h-8 px-2.5 rounded-md bg-white/10"
                   title={theme === "dark" ? t.themeToLight : t.themeToDark}
                   aria-label={theme === "dark" ? t.themeToLight : t.themeToDark}
                 >
-                  <i className={`fa-solid ${theme === "dark" ? "fa-sun" : "fa-moon"} text-base`} aria-hidden="true"></i>
+                  <i className={`fa-solid ${theme === "dark" ? "fa-sun" : "fa-moon"} leading-none`} aria-hidden="true"></i>
                 </button>
               </li>
             </ul>
