@@ -138,6 +138,15 @@ export default {
 
     versesTitle: "Related Verses",
     versesOpen: "View on the verse board",
+
+    faqTitle: "Frequently Asked Questions",
+    faq: [
+      { q: "What is faraid?", a: "Faraid is the science of the inheritance shares set in the Quran. Verses 4/11, 4/12 and 4/176 of Surah An-Nisa define the shares of the spouse, children, parents and siblings. This calculator computes those shares step by step for the family situation you enter." },
+      { q: "What are the calculations based on?", a: "Calculations follow the published Calculation Rules document, prepared on the basis of the Suleymaniye Foundation rendering. Every behaviour of the engine is pinned to that document by automated tests, and each result comes with a step-by-step explanation." },
+      { q: "Which heirs are covered?", a: "The spouse, children and grandchildren (via representation), parents, and full/paternal/maternal siblings (nephews via representation) are covered. Shares of grandparents, uncles and aunts are outside the scope of this work." },
+      { q: "Is my data stored anywhere?", a: "No. Everything is computed in your browser; nothing you enter is sent to a server. Saved scenarios are kept only in your own browser's storage." },
+      { q: "Is the tool free, and how do I share a result?", a: "The tool is completely free. The Share button produces a link that reopens your exact calculation; the Print/PDF button turns the result into a document." },
+    ],
   },
 
   engine: {

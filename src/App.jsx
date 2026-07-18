@@ -5,6 +5,7 @@ import Footer from "./components/Footer.jsx";
 import AboutModal from "./components/AboutModal.jsx";
 import ResultTable from "./components/ResultTable.jsx";
 import StepsPanel from "./components/StepsPanel.jsx";
+import FaqSection from "./components/FaqSection.jsx";
 import VersesModal from "./components/VersesModal.jsx";
 import GoogleAd from "./components/GoogleAd.jsx";
 import { computeDistribution } from "./lib/feraiz.js";
@@ -472,6 +473,7 @@ export default function App() {
         <div id="sonuc">
           <ResultTable result={result} onOpenVerses={() => setVersesOpen(true)} />
           <StepsPanel steps={result.steps} />
+          <FaqSection />
         </div>
       </main>
 

@@ -139,6 +139,15 @@ export default {
 
     versesTitle: "İlgili Ayetler",
     versesOpen: "Ayet panosunda görüntüle",
+
+    faqTitle: "Sık Sorulan Sorular",
+    faq: [
+      { q: "Feraiz nedir?", a: "Feraiz, Kur'an'da belirlenmiş miras paylarını konu alan ilimdir. Nisâ Suresi 4/11, 4/12 ve 4/176. ayetler; eş, çocuklar, anne-baba ve kardeşlerin paylarını belirler. Bu hesaplayıcı, o payları girilen aile durumuna göre adım adım hesaplar." },
+      { q: "Hesaplama neye göre yapılıyor?", a: "Hesaplar, Süleymaniye Vakfı meali esas alınarak hazırlanan ve sitede yayımlanan Hesaplama Kuralları belgesine göre yapılır. Motorun her davranışı bu belgeye otomatik testlerle bağlıdır ve her sonucun adım adım açıklaması gösterilir." },
+      { q: "Hangi mirasçılar kapsanıyor?", a: "Eş (koca/hanımlar), çocuklar ve temsil yoluyla torunlar, anne-baba ile öz, baba-bir ve anne-bir kardeşler (temsil yoluyla yeğenler) kapsanır. Dede/nine, amca, hala, dayı ve teyze payları bu çalışmanın kapsamı dışındadır." },
+      { q: "Girdiğim veriler kaydediliyor mu?", a: "Hayır. Tüm hesaplama tarayıcınızda yapılır; girdiğiniz hiçbir veri sunucuya gönderilmez. Kaydettiğiniz senaryolar da yalnızca kendi tarayıcınızın deposunda tutulur." },
+      { q: "Bu araç ücretli mi, sonucu nasıl paylaşırım?", a: "Araç tamamen ücretsizdir. Paylaş düğmesi, girdiğiniz hesabı aynen açan bir link üretir; Yazdır/PDF düğmesiyle sonucu belge olarak alabilirsiniz." },
+    ],
   },
 
   engine: {

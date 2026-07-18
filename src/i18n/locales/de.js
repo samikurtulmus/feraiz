@@ -138,6 +138,15 @@ export default {
 
     versesTitle: "Zugehörige Verse",
     versesOpen: "Auf der Verstafel ansehen",
+
+    faqTitle: "Häufige Fragen",
+    faq: [
+      { q: "Was ist Faraid?", a: "Faraid ist die Lehre von den im Koran festgelegten Erbanteilen. Die Verse 4/11, 4/12 und 4/176 der Sure An-Nisa bestimmen die Anteile von Ehepartner, Kindern, Eltern und Geschwistern. Dieser Rechner berechnet diese Anteile Schritt für Schritt für die eingegebene Familiensituation." },
+      { q: "Worauf basieren die Berechnungen?", a: "Die Berechnungen folgen dem veröffentlichten Regelwerk, das auf Grundlage der Übersetzung der Süleymaniye-Stiftung erstellt wurde. Jedes Verhalten des Rechenwerks ist durch automatisierte Tests an dieses Dokument gebunden, und jedes Ergebnis wird Schritt für Schritt erklärt." },
+      { q: "Welche Erben werden berücksichtigt?", a: "Ehepartner, Kinder und Enkel (per Vertretung), Eltern sowie Voll-, väterliche und mütterliche Geschwister (Neffen per Vertretung). Anteile von Großeltern, Onkeln und Tanten liegen außerhalb des Umfangs." },
+      { q: "Werden meine Daten gespeichert?", a: "Nein. Alles wird in Ihrem Browser berechnet; nichts wird an einen Server gesendet. Gespeicherte Szenarien bleiben nur im Speicher Ihres eigenen Browsers." },
+      { q: "Ist das Tool kostenlos, und wie teile ich ein Ergebnis?", a: "Das Tool ist völlig kostenlos. Die Teilen-Schaltfläche erzeugt einen Link, der Ihre Berechnung exakt wieder öffnet; mit Drucken/PDF wird das Ergebnis zum Dokument." },
+    ],
   },
 
   engine: {

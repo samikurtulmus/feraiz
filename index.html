@@ -54,26 +54,42 @@
     <meta property="og:description" content="Kur'an'da belirlenmiş miras paylarına dayalı hesaplayıcı." />
     <meta property="og:url" content="https://feraiz.com/" />
     <meta property="og:site_name" content="Feraiz.com" />
-    <meta property="og:image" content="/og-image.svg" />
-    <meta name="twitter:card" content="summary" />
+    <meta property="og:image" content="https://feraiz.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:image" content="https://feraiz.com/og-image.png" />
 
-    <!-- Structured Data -->
-    <script type="application/ld+json">
+    <!-- Structured Data (dil değişince JS güncelliyor) -->
+    <script type="application/ld+json" id="ld-app">
     {
       "@context": "https://schema.org",
-      "@type": "WebSite",
-      "name": "Feraiz.com",
+      "@type": "WebApplication",
+      "name": "Feraiz.com — Ayet Bazlı Miras Hesaplayıcı",
       "url": "https://feraiz.com/",
-      "potentialAction": {
-        "@type": "SearchAction",
-        "target": "https://feraiz.com/?q={search_term_string}",
-        "query-input": "required name=search_term_string"
-      }
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web",
+      "browserRequirements": "JavaScript gerektirir",
+      "inLanguage": ["tr", "en", "ar", "de", "fr"],
+      "isAccessibleForFree": true,
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "TRY" },
+      "description": "Kur'an'da belirlenmiş miras paylarına dayalı, adım adım açıklamalı, ücretsiz miras hesaplayıcı.",
+      "image": "https://feraiz.com/og-image.png"
     }
     </script>
   </head>
   <body class="bg-light text-primary">
     <div id="root"></div>
+    <noscript>
+      <div style="max-width:640px;margin:40px auto;padding:0 16px;font-family:system-ui,sans-serif;line-height:1.7">
+        <h1>Feraiz.com — Ayet Bazlı Miras Hesaplayıcı</h1>
+        <p>Kur'an'da belirlenmiş miras paylarına (feraiz) dayalı, adım adım açıklamalı ücretsiz hesaplayıcı.
+        Eş, çocuk/torun, anne-baba ve kardeş paylarını Nisâ 4/11, 4/12 ve 4/176 ayetleri esasıyla hesaplar.
+        Uygulamanın çalışması için JavaScript gereklidir. Hesaplama kuralları:
+        <a href="/kurallar.html">feraiz.com/kurallar.html</a></p>
+        <p><em>A free Quran-based Islamic inheritance (faraid) calculator. JavaScript is required.</em></p>
+      </div>
+    </noscript>
 
     <!-- Vite giriş noktası -->
     <script type="module" src="./src/main.jsx"></script>

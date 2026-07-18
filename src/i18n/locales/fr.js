@@ -138,6 +138,15 @@ export default {
 
     versesTitle: "Versets liés",
     versesOpen: "Voir sur le tableau des versets",
+
+    faqTitle: "Questions fréquentes",
+    faq: [
+      { q: "Qu'est-ce que le faraid ?", a: "Le faraid est la science des parts d'héritage fixées dans le Coran. Les versets 4/11, 4/12 et 4/176 de la sourate An-Nisa déterminent les parts du conjoint, des enfants, des parents et des frères et sœurs. Ce calculateur calcule ces parts pas à pas selon la situation familiale saisie." },
+      { q: "Sur quoi reposent les calculs ?", a: "Les calculs suivent le document des Règles de calcul publié sur le site, préparé sur la base de la traduction de la Fondation Süleymaniye. Chaque comportement du moteur est lié à ce document par des tests automatisés, et chaque résultat est expliqué pas à pas." },
+      { q: "Quels héritiers sont couverts ?", a: "Le conjoint, les enfants et petits-enfants (par représentation), les parents, ainsi que les frères et sœurs germains, consanguins et utérins (neveux par représentation). Les parts des grands-parents, oncles et tantes sont hors du champ de ce travail." },
+      { q: "Mes données sont-elles enregistrées ?", a: "Non. Tout est calculé dans votre navigateur ; rien de ce que vous saisissez n'est envoyé à un serveur. Les scénarios enregistrés restent uniquement dans le stockage de votre propre navigateur." },
+      { q: "L'outil est-il gratuit, et comment partager un résultat ?", a: "L'outil est entièrement gratuit. Le bouton Partager crée un lien qui rouvre votre calcul à l'identique ; le bouton Imprimer/PDF transforme le résultat en document." },
+    ],
   },
 
   engine: {
