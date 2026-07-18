@@ -49,30 +49,40 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
                   <span className="hidden md:inline">{t.navMealLong}</span>
                 </a>
               </li>
-              <li><button onClick={onOpenAbout} className="hover:underline">{t.navAbout}</button></li>
-              {/* Mobil: dil + tema, menünün doğal devamı olarak */}
-              <li className="sm:hidden">
+              {/* Hakkında: geniş ekranda metin, mobilde bilgi simgesi */}
+              <li>
+                <button onClick={onOpenAbout} className="hover:underline" aria-label={t.navAbout} title={t.navAbout}>
+                  <span className="hidden sm:inline">{t.navAbout}</span>
+                  <i className="fa-solid fa-circle-info text-base sm:hidden rounded-md bg-white/10 px-2 py-1" aria-hidden="true"></i>
+                </button>
+              </li>
+              {/* Mobil: dil = küre simgesi (üzerinde görünmez select, dokununca telefonun listesi açılır) */}
+              <li className="sm:hidden relative">
+                <span className="inline-block rounded-md bg-white/10 px-2 py-1" aria-hidden="true">
+                  <i className="fa-solid fa-globe text-base"></i>
+                </span>
                 <select
                   value={lang}
                   onChange={(e) => setLang(e.target.value)}
-                  className="rounded-md bg-white/10 text-light text-sm font-semibold px-1.5 py-0.5 border-0 focus:outline-none focus:ring-2 focus:ring-white/40 [&>option]:text-ink"
+                  className="absolute inset-0 w-full h-full opacity-0"
                   title={t.langLabel}
                   aria-label={t.langLabel}
                 >
                   {Object.values(locales).map((l) => (
-                    <option key={l.code} value={l.code}>{l.code.toUpperCase()}</option>
+                    <option key={l.code} value={l.code}>{l.name}</option>
                   ))}
                 </select>
               </li>
+              {/* Mobil: tema */}
               <li className="sm:hidden">
                 <button
                   type="button"
                   onClick={onToggleTheme}
-                  className="rounded-md bg-white/10 px-2 py-0.5"
+                  className="rounded-md bg-white/10 px-2 py-1"
                   title={theme === "dark" ? t.themeToLight : t.themeToDark}
                   aria-label={theme === "dark" ? t.themeToLight : t.themeToDark}
                 >
-                  <i className={`fa-solid ${theme === "dark" ? "fa-sun" : "fa-moon"} text-sm`} aria-hidden="true"></i>
+                  <i className={`fa-solid ${theme === "dark" ? "fa-sun" : "fa-moon"} text-base`} aria-hidden="true"></i>
                 </button>
               </li>
             </ul>
