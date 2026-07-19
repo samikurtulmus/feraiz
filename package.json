@@ -11,7 +11,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "kurallar": "node scripts/build-kurallar.mjs",
-    "og": "node scripts/build-og.mjs"
+    "og": "node scripts/build-og.mjs",
+    "meal": "node scripts/update-meal.mjs"
   },
   "dependencies": {
     "react": "^18.2.0",
