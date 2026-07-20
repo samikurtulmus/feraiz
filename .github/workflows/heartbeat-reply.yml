@@ -1,0 +1,40 @@
+name: Heartbeat Reply
+
+on:
+  issue_comment:
+    types: [created]
+  issues:
+    types: [closed]
+
+permissions:
+  contents: write
+  issues: write
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    if: github.actor == 'samikurtulmus'
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: bot-heartbeat
+
+      - name: İzlenen issue mu kontrol et, öyleyse sıfırla
+        run: |
+          issueNumber=$(jq -r '.issueNumber // empty' state.json)
+          eventIssue="${{ github.event.issue.number }}"
+
+          if [ -n "$issueNumber" ] && [ "$issueNumber" = "$eventIssue" ]; then
+            echo '{"downSince":null,"issueNumber":null,"issueOpenedAt":null}' > state.json
+            git config user.name "feraiz-heartbeat[bot]"
+            git config user.email "actions@users.noreply.github.com"
+            git add state.json
+            git commit -m "heartbeat: yanıt alındı, izleme sıfırlandı"
+            git push origin bot-heartbeat
+
+            if [ "${{ github.event_name }}" = "issue_comment" ]; then
+              gh issue close "$eventIssue" --repo "$GITHUB_REPOSITORY" --comment "Anlaşıldı, hayatta olduğun teyit edildi. İzlemeye kaldığı yerden devam ediyorum. 🤍" || true
+            fi
+          fi

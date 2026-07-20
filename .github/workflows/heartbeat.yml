@@ -1,0 +1,166 @@
+name: Heartbeat
+
+on:
+  schedule:
+    - cron: '17 8 * * *'
+  workflow_dispatch:
+    inputs:
+      simulate_down:
+        description: 'Test: siteyi "down" gibi say'
+        type: boolean
+        default: false
+      force_deploy:
+        description: 'Test: sayaç ne olursa olsun şimdi deploy et'
+        type: boolean
+        default: false
+
+permissions:
+  contents: write
+  issues: write
+
+concurrency:
+  group: heartbeat
+  cancel-in-progress: false
+
+env:
+  SITE_URL: https://feraiz.com
+  OWNER_LOGIN: samikurtulmus
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    outputs:
+      should_deploy: ${{ steps.decide.outputs.should_deploy }}
+      issue_number: ${{ steps.decide.outputs.issue_number }}
+    steps:
+      - name: bot-heartbeat branch'ini çek
+        uses: actions/checkout@v4
+        with:
+          ref: bot-heartbeat
+          path: state
+
+      - name: Siteyi yokla
+        id: probe
+        run: |
+          status="up"
+          if [ "${{ inputs.simulate_down }}" = "true" ]; then
+            status="down"
+          else
+            ok=0
+            for i in 1 2 3; do
+              code=$(curl -s -o /dev/null -w '%{http_code}' -m 15 -L "$SITE_URL" || echo "000")
+              if [ "$code" -ge 200 ] && [ "$code" -lt 400 ]; then ok=1; break; fi
+              sleep 10
+            done
+            [ "$ok" = "1" ] || status="down"
+          fi
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+
+      - name: Durumu değerlendir
+        id: decide
+        working-directory: state
+        run: |
+          today=$(date -u +%F)
+          downSince=$(jq -r '.downSince // empty' state.json)
+          issueNumber=$(jq -r '.issueNumber // empty' state.json)
+          issueOpenedAt=$(jq -r '.issueOpenedAt // empty' state.json)
+          should_deploy=false
+
+          if [ "${{ steps.probe.outputs.status }}" = "up" ]; then
+            if [ -n "$issueNumber" ]; then
+              gh issue comment "$issueNumber" --repo "$GITHUB_REPOSITORY" --body "feraiz.com tekrar erişilebilir durumda. Otomatik olarak kapatıyorum, izlemeye devam ediyorum. 🤍" || true
+              gh issue close "$issueNumber" --repo "$GITHUB_REPOSITORY" || true
+            fi
+            echo '{"downSince":null,"issueNumber":null,"issueOpenedAt":null}' > state.json
+          else
+            if [ -z "$downSince" ]; then
+              downSince="$today"
+              jq -n --arg d "$downSince" '{downSince:$d, issueNumber:null, issueOpenedAt:null}' > state.json
+            else
+              daysDown=$(( ( $(date -u -d "$today" +%s) - $(date -u -d "$downSince" +%s) ) / 86400 ))
+              if [ "$daysDown" -ge 7 ] && [ -z "$issueNumber" ]; then
+                body=$(printf '%s\n\n%s\n\n%s\n\n%s' \
+                  "feraiz.com **7 gündür erişilemiyor**." \
+                  "Sunucu ya da barındırma süresi dolmuş olabilir. Eğer bir hafta içinde bu konuda bir yanıt gelmezse (bu Issue'ya yorum yazarak, bu bildirim mailine yanıt vererek ya da Issue'yu kapatarak), proje otomatik olarak GitHub Pages üzerinde yeniden yayınlanacak: https://${OWNER_LOGIN}.github.io/feraiz/" \
+                  "Her şey yolundaysa sadece bu Issue'ya bir yorum yaz ya da kapat, izleme kaldığı yerden devam edecek. 🤍" \
+                  "@${OWNER_LOGIN}")
+                url=$(gh issue create --repo "$GITHUB_REPOSITORY" --title "⚠️ feraiz.com 7 gündür erişilemiyor" --body "$body" --assignee "$OWNER_LOGIN")
+                num=$(echo "$url" | grep -oE '[0-9]+$')
+                jq -n --arg d "$downSince" --arg n "$num" --arg o "$today" '{downSince:$d, issueNumber:($n|tonumber), issueOpenedAt:$o}' > state.json
+              elif [ -n "$issueNumber" ]; then
+                openState=$(gh issue view "$issueNumber" --repo "$GITHUB_REPOSITORY" --json state -q .state 2>/dev/null || echo "OPEN")
+                if [ "$openState" = "OPEN" ]; then
+                  daysSinceIssue=$(( ( $(date -u -d "$today" +%s) - $(date -u -d "$issueOpenedAt" +%s) ) / 86400 ))
+                  if [ "$daysSinceIssue" -ge 7 ]; then
+                    should_deploy=true
+                  fi
+                fi
+              fi
+            fi
+          fi
+
+          if [ "${{ inputs.force_deploy }}" = "true" ]; then
+            should_deploy=true
+          fi
+
+          issue_number=$(jq -r '.issueNumber // empty' state.json)
+          echo "should_deploy=$should_deploy" >> "$GITHUB_OUTPUT"
+          echo "issue_number=$issue_number" >> "$GITHUB_OUTPUT"
+
+      - name: state.json commit et
+        working-directory: state
+        run: |
+          git config user.name "feraiz-heartbeat[bot]"
+          git config user.email "actions@users.noreply.github.com"
+          if ! git diff --quiet -- state.json; then
+            git add state.json
+            git commit -m "heartbeat: durum güncellendi ($(date -u +%F))"
+            git push origin bot-heartbeat
+          fi
+
+  deploy:
+    needs: check
+    if: needs.check.outputs.should_deploy == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+      issues: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - run: npm ci
+
+      - run: npm run build
+        env:
+          VITE_BASE: /feraiz/
+
+      - run: touch dist/.nojekyll
+
+      - uses: actions/configure-pages@v5
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+      - id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Issue'ya not düş
+        if: needs.check.outputs.issue_number != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh issue comment "${{ needs.check.outputs.issue_number }}" --repo "$GITHUB_REPOSITORY" --body "7 gün boyunca yanıt alınamadı; proje GitHub Pages üzerinde yeniden yayınlandı: ${{ steps.deployment.outputs.page_url }}" || true
