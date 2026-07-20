@@ -33,14 +33,14 @@ export default function Header({ onOpenAbout, theme, onToggleTheme }) {
   return (
     <header className="no-print sticky top-0 z-10 bg-primary text-light shadow-md w-full pt-[env(safe-area-inset-top)]">
       {/* Masaüstü: tek satır — solda logo+başlık, ortada nav, sağda dil+tema */}
-      <div className="hidden sm:grid grid-cols-[1fr_auto_1fr] items-center gap-4 max-w-6xl mx-auto px-4 py-3 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
+      <div className="hidden sm:grid grid-cols-[auto_1fr_auto] items-center gap-4 max-w-6xl mx-auto px-4 py-3 pl-[env(safe-area-inset-left)] pr-[env(safe-area-inset-right)]">
         <div className="flex items-center gap-2 min-w-0">
           <i className="fas fa-balance-scale text-lg shrink-0" aria-hidden="true"></i>
           <span className="text-lg font-extrabold tracking-wide whitespace-nowrap">Feraiz.com</span>
-          <span className="hidden md:inline opacity-80 text-sm truncate">— {t.tagline}</span>
+          <span className="hidden lg:inline opacity-80 text-sm whitespace-nowrap">| {t.tagline.replace(/^[^:]+:\s*/, '')}</span>
         </div>
 
-        <nav className="justify-self-center">
+        <nav className="flex justify-center">
           <ul className="flex items-center gap-5 text-sm whitespace-nowrap">
             <li>
               <a href={import.meta.env.BASE_URL + 'meal/'} className="hover:underline text-light">
