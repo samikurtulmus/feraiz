@@ -13,6 +13,10 @@ on:
         description: 'Test: sayaç ne olursa olsun şimdi deploy et'
         type: boolean
         default: false
+      deploy_placeholder:
+        description: 'Gerçek siteyi değil, "beklemede" sayfasını yayınla (force_deploy ile birlikte kullan)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -141,11 +145,40 @@ jobs:
         with:
           node-version: 20
 
-      - run: npm ci
+      - name: Bağımlılıkları kur
+        if: inputs.deploy_placeholder != true
+        run: npm ci
 
-      - run: npm run build
+      - name: Build
+        if: inputs.deploy_placeholder != true
+        run: npm run build
         env:
           VITE_BASE: /feraiz/
+
+      - name: Bekleme sayfası oluştur
+        if: inputs.deploy_placeholder == true
+        run: |
+          mkdir -p dist
+          cat > dist/index.html <<'HTML'
+          <!doctype html>
+          <html lang="tr">
+          <head>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <meta name="robots" content="noindex">
+          <title>Feraiz.com — Yedek Adres (Beklemede)</title>
+          <style>
+            body { font-family: system-ui, sans-serif; max-width: 38rem; margin: 4rem auto; padding: 0 1.25rem; line-height: 1.6; color: #1f2a24; }
+            a { color: #14532d; }
+          </style>
+          </head>
+          <body>
+          <h1>Feraiz.com şu anda çalışıyor</h1>
+          <p>Bu adres, <a href="https://feraiz.com">feraiz.com</a> uzun süre erişilemez duruma gelirse otomatik olarak devreye giren bir yedektir.</p>
+          <p>Şu anda asıl site ayakta olduğu için burada yalnızca bu bekleme sayfası var.</p>
+          </body>
+          </html>
+          HTML
 
       - run: touch dist/.nojekyll
 
